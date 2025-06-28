@@ -7,12 +7,15 @@ import reactRefresh from "eslint-plugin-react-refresh";
 import globals from "globals";
 
 export default defineConfig([
-  globalIgnores(["dist", "build","node_modules"]),
+  globalIgnores(["dist", "build", "node_modules"]),
   {
     files: ["**/*.{js,jsx}"],
     languageOptions: {
       ecmaVersion: "latest",
-      globals: globals.browser,
+      globals: {
+        ...globals.browser,
+        ...globals.webextensions,
+      },
       parserOptions: {
         ecmaFeatures: { jsx: true },
         sourceType: "module",
