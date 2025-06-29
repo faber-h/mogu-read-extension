@@ -1,9 +1,9 @@
 import { ChevronDownIcon, ChevronRightIcon } from "@heroicons/react/24/solid";
 import { useState } from "react";
 
-import Section from "@/components/Section";
-import SectionScroll from "@/components/SectionScroll";
-import SentenceCard from "@/components/SentenceCard";
+import Section from "./components/Section";
+import SectionScroll from "./components/SectionScroll";
+import SentenceCard from "./components/SentenceCard";
 
 const DeclutterMode = () => {
   const [selectedSentences, setSelectedSentences] = useState([
