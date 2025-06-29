@@ -3,6 +3,7 @@ import { ChevronDownIcon, ChevronRightIcon } from "@heroicons/react/24/solid";
 import { useState } from "react";
 
 import Section from "@/components/Section";
+import SectionScroll from "@/components/SectionScroll";
 
 const DeclutterMode = () => {
   const [selectedSentences, setSelectedSentences] = useState([
@@ -64,10 +65,7 @@ const DeclutterMode = () => {
   return (
     <div className="flex h-full flex-col gap-4 overflow-hidden">
       <Section title="📑 선택된 문장" flex="flex-[3]">
-        <div
-          className="flex flex-1 flex-col gap-2 overflow-y-auto px-4"
-          style={{ scrollbarGutter: "stable" }}
-        >
+        <SectionScroll>
           {selectedSentences.map((sentence, idx) => (
             <div
               key={idx}
@@ -79,7 +77,7 @@ const DeclutterMode = () => {
               </button>
             </div>
           ))}
-        </div>
+        </SectionScroll>
 
         <button className="mx-4 mt-4 w-[calc(100%-2rem)] shrink-0 rounded-full bg-purple-500 py-2 text-center text-sm text-white transition hover:bg-purple-600">
           정리 시작
@@ -87,10 +85,7 @@ const DeclutterMode = () => {
       </Section>
 
       <Section title="📜 정리된 사이트" flex="flex-[2]">
-        <div
-          className="flex flex-1 flex-col gap-2 overflow-y-auto px-4"
-          style={{ scrollbarGutter: "stable" }}
-        >
+        <SectionScroll>
           {history.map((site, idx) => (
             <div key={site.url}>
               <button
@@ -124,7 +119,7 @@ const DeclutterMode = () => {
               )}
             </div>
           ))}
-        </div>
+        </SectionScroll>
       </Section>
     </div>
   );
