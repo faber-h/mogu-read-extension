@@ -5,10 +5,10 @@ import Nav from "@/components/Nav";
 
 const App = () => {
   return (
-    <div>
+    <div className="flex h-screen flex-col">
       <Header />
       <Nav />
-      <div className="p-4">
+      <div className="flex flex-1 flex-col overflow-hidden p-4">
         <Outlet />
       </div>
     </div>
