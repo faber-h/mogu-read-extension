@@ -2,6 +2,8 @@ import { XMarkIcon } from "@heroicons/react/24/outline";
 import { ChevronDownIcon, ChevronRightIcon } from "@heroicons/react/24/solid";
 import { useState } from "react";
 
+import Section from "@/components/Section";
+
 const DeclutterMode = () => {
   const [selectedSentences, setSelectedSentences] = useState([
     "이 문장을 제거합니다.",
@@ -61,11 +63,7 @@ const DeclutterMode = () => {
 
   return (
     <div className="flex h-full flex-col gap-4 overflow-hidden">
-      <section className="flex flex-[3] flex-col overflow-hidden rounded border border-purple-200 px-0 py-4">
-        <h2 className="mb-2 px-4 text-sm font-semibold text-purple-700">
-          📑 선택된 문장
-        </h2>
-
+      <Section title="📑 선택된 문장" flex="flex-[3]">
         <div
           className="flex flex-1 flex-col gap-2 overflow-y-auto px-4"
           style={{ scrollbarGutter: "stable" }}
@@ -86,13 +84,9 @@ const DeclutterMode = () => {
         <button className="mx-4 mt-4 w-[calc(100%-2rem)] shrink-0 rounded-full bg-purple-500 py-2 text-center text-sm text-white transition hover:bg-purple-600">
           정리 시작
         </button>
-      </section>
+      </Section>
 
-      <section className="flex flex-[2] flex-col overflow-hidden rounded border border-purple-200 px-0 py-4">
-        <h2 className="mb-2 px-4 text-sm font-semibold text-purple-700">
-          📜 정리된 사이트
-        </h2>
-
+      <Section title="📜 정리된 사이트" flex="flex-[2]">
         <div
           className="flex flex-1 flex-col gap-2 overflow-y-auto px-4"
           style={{ scrollbarGutter: "stable" }}
@@ -131,7 +125,7 @@ const DeclutterMode = () => {
             </div>
           ))}
         </div>
-      </section>
+      </Section>
     </div>
   );
 };
