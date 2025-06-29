@@ -1,3 +1,5 @@
+import { XMarkIcon } from "@heroicons/react/24/outline";
+import { ChevronDownIcon, ChevronRightIcon } from "@heroicons/react/24/solid";
 import { useState } from "react";
 
 const DeclutterMode = () => {
@@ -75,7 +77,7 @@ const DeclutterMode = () => {
             >
               <span className="block break-words">{sentence}</span>
               <button onClick={() => removeSelected(idx)} className="shrink-0">
-                x
+                <XMarkIcon className="h-4 w-4" />
               </button>
             </div>
           ))}
@@ -99,10 +101,14 @@ const DeclutterMode = () => {
             <div key={site.url}>
               <button
                 onClick={() => toggleSite(idx)}
-                className="flex w-full justify-between text-left text-sm font-medium"
+                className="flex items-center"
               >
-                {site.isOpen ? "▼" : "▶"} {site.url} ({site.sentences.length}
-                문장)
+                {site.isOpen ? (
+                  <ChevronDownIcon className="mr-1 h-4 w-4" />
+                ) : (
+                  <ChevronRightIcon className="mr-1 h-4 w-4" />
+                )}{" "}
+                {site.url} ({site.sentences.length}문장)
               </button>
               {site.isOpen && (
                 <div className="mt-1 ml-4 flex flex-col gap-1">
@@ -116,7 +122,7 @@ const DeclutterMode = () => {
                         onClick={() => removeHistorySentence(idx, sIdx)}
                         className="shrink-0"
                       >
-                        x
+                        <XMarkIcon className="h-4 w-4" />
                       </button>
                     </div>
                   ))}
