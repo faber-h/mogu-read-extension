@@ -1,9 +1,9 @@
-import { XMarkIcon } from "@heroicons/react/24/outline";
 import { ChevronDownIcon, ChevronRightIcon } from "@heroicons/react/24/solid";
 import { useState } from "react";
 
 import Section from "@/components/Section";
 import SectionScroll from "@/components/SectionScroll";
+import SentenceCard from "@/components/SentenceCard";
 
 const DeclutterMode = () => {
   const [selectedSentences, setSelectedSentences] = useState([
@@ -67,15 +67,11 @@ const DeclutterMode = () => {
       <Section title="📑 선택된 문장" flex="flex-[3]">
         <SectionScroll>
           {selectedSentences.map((sentence, idx) => (
-            <div
+            <SentenceCard
               key={idx}
-              className="flex w-full items-center justify-between rounded border border-gray-300 px-3 py-2 text-sm"
-            >
-              <span className="block break-words">{sentence}</span>
-              <button onClick={() => removeSelected(idx)} className="shrink-0">
-                <XMarkIcon className="h-4 w-4" />
-              </button>
-            </div>
+              text={sentence}
+              onRemove={() => removeSelected(idx)}
+            />
           ))}
         </SectionScroll>
 
@@ -101,19 +97,13 @@ const DeclutterMode = () => {
               </button>
               {site.isOpen && (
                 <div className="mt-1 ml-4 flex flex-col gap-1">
-                  {site.sentences.map((s, sIdx) => (
-                    <div
-                      key={sIdx}
-                      className="flex w-full justify-between rounded border border-gray-200 px-3 py-1 text-sm text-gray-700"
-                    >
-                      <span className="block break-words">- {s}</span>
-                      <button
-                        onClick={() => removeHistorySentence(idx, sIdx)}
-                        className="shrink-0"
-                      >
-                        <XMarkIcon className="h-4 w-4" />
-                      </button>
-                    </div>
+                  {site.sentences.map((sentence, sentenceIdx) => (
+                    <SentenceCard
+                      key={sentenceIdx}
+                      text={sentence}
+                      prefix="- "
+                      onRemove={() => removeHistorySentence(idx, sentenceIdx)}
+                    />
                   ))}
                 </div>
               )}
