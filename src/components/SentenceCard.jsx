@@ -6,7 +6,7 @@ const SentenceCard = ({ text, onRemove, prefix = "" }) => (
       {prefix}
       {text}
     </span>
-    <button onClick={onRemove} className="shrink-0">
+    <button onClick={onRemove} className="shrink-0 cursor-pointer">
       <XMarkIcon className="h-4 w-4" />
     </button>
   </div>

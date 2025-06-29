@@ -10,7 +10,7 @@ const Header = () => {
       <h1 className="text-lg font-bold text-purple-600">MoguRead</h1>
       <button
         onClick={handleGoToDashboard}
-        className="rounded-full border border-purple-500 px-4 py-1 text-sm text-gray-600 shadow-sm transition hover:bg-purple-500/90 hover:text-white"
+        className="cursor-pointer rounded-full border border-purple-500 px-4 py-1 text-sm text-gray-600 shadow-sm transition hover:bg-purple-500/90 hover:text-white"
       >
         대시보드
       </button>

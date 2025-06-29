@@ -75,7 +75,7 @@ const DeclutterMode = () => {
           ))}
         </SectionScroll>
 
-        <button className="mx-4 mt-4 w-[calc(100%-2rem)] shrink-0 rounded-full bg-purple-500 py-2 text-center text-sm text-white transition hover:bg-purple-600">
+        <button className="mx-4 mt-4 w-[calc(100%-2rem)] shrink-0 cursor-pointer rounded-full bg-purple-500 py-2 text-center text-sm text-white transition hover:bg-purple-600">
           정리 시작
         </button>
       </Section>
@@ -86,7 +86,7 @@ const DeclutterMode = () => {
             <div key={site.url}>
               <button
                 onClick={() => toggleSite(idx)}
-                className="flex items-center"
+                className="flex cursor-pointer items-center"
               >
                 {site.isOpen ? (
                   <ChevronDownIcon className="mr-1 h-4 w-4" />

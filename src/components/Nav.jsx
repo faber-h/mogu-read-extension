@@ -27,7 +27,7 @@ const Nav = () => {
           <button
             key={mode.path}
             onClick={() => navigate(mode.path)}
-            className={`relative z-10 w-32 rounded-full py-2 text-center text-sm font-medium ${
+            className={`relative z-10 w-32 cursor-pointer rounded-full py-2 text-center text-sm font-medium ${
               selectedIndex === index ? "text-white" : "text-gray-600"
             }`}
           >
