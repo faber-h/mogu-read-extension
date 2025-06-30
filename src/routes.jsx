@@ -3,7 +3,7 @@ import { createHashRouter } from "react-router";
 import App from "@/App";
 import { ROUTES } from "@/constants/paths";
 import DeclutterMode from "@/pages/DeclutterMode/DeclutterMode";
-import FocusMode from "@/pages/FocusMode";
+import FocusMode from "@/pages/FocusMode/FocusMode";
 
 const router = createHashRouter([
   {
