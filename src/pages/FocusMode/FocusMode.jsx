@@ -5,11 +5,13 @@ import ReadingContent from "./components/ReadingContent";
 import ReadingControls from "./components/ReadingControls";
 import ReadingProgress from "./components/ReadingProgress";
 import ReadingSummary from "./components/ReadingSummary";
+import { READING_SPEED } from "./constants/readingSpeed";
+import { READ_STATUS } from "./constants/readStatus";
 
 const FocusMode = () => {
   const [isContentDetected] = useState(true); // 임시 고정
-  const [status, setStatus] = useState("idle");
-  const [speed, setSpeed] = useState("normal");
+  const [readStatus, setReadStatus] = useState(READ_STATUS.IDLE);
+  const [readingSpeed, setReadingSpeed] = useState(READING_SPEED.NORMAL);
   const [progress, setProgress] = useState({
     currentLine: 0,
     totalLines: 5,
@@ -18,11 +20,11 @@ const FocusMode = () => {
 
   const handleStart = useCallback(() => {
     setProgress({ currentLine: 0, totalLines: 5, elapsed: 0 });
-    setStatus("reading");
+    setReadStatus(READ_STATUS.READING);
   }, []);
 
   const handleDone = useCallback(() => {
-    setStatus("done");
+    setReadStatus(READ_STATUS.DONE);
   }, []);
 
   const handlePause = () => {
@@ -45,26 +47,26 @@ const FocusMode = () => {
   };
 
   const handleReset = () => {
-    setStatus("idle");
+    setReadStatus(READ_STATUS.IDLE);
   };
 
   return (
     <div className="space-y-6 p-4">
-      {status === "idle" && (
+      {readStatus === READ_STATUS.IDLE && (
         <ReadingConfig
-          speed={speed}
-          setSpeed={setSpeed}
+          readingSpeed={readingSpeed}
+          setReadingSpeed={setReadingSpeed}
           onStart={handleStart}
           isContentDetected={isContentDetected}
         />
       )}
 
-      {status === "reading" && (
+      {readStatus === READ_STATUS.READING && (
         <>
           <ReadingContent
             progress={progress}
             setProgress={setProgress}
-            speed={speed}
+            readingSpeed={readingSpeed}
             onDone={handleDone}
           />
           <ReadingProgress progress={progress} setProgress={setProgress} />
@@ -76,7 +78,7 @@ const FocusMode = () => {
         </>
       )}
 
-      {status === "done" && (
+      {readStatus === READ_STATUS.DONE && (
         <ReadingSummary progress={progress} onReset={handleReset} />
       )}
     </div>

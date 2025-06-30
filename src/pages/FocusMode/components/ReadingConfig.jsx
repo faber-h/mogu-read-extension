@@ -1,4 +1,17 @@
-const ReadingConfig = ({ speed, setSpeed, onStart, isContentDetected }) => {
+import { READING_SPEED, READING_SPEED_LABEL } from "../constants/readingSpeed";
+
+const SPEED_OPTIONS = [
+  READING_SPEED.FAST,
+  READING_SPEED.NORMAL,
+  READING_SPEED.SLOW,
+];
+
+const ReadingConfig = ({
+  readingSpeed,
+  setReadingSpeed,
+  onStart,
+  isContentDetected,
+}) => {
   return (
     <div className="flex flex-col items-center space-y-4">
       <h2 className="text-lg font-semibold">📖 읽기 전 준비</h2>
@@ -31,18 +44,18 @@ const ReadingConfig = ({ speed, setSpeed, onStart, isContentDetected }) => {
       )}
 
       <div className="flex gap-2">
-        {["fast", "normal", "slow"].map((s) => (
+        {SPEED_OPTIONS.map((option) => (
           <button
-            key={s}
-            onClick={() => setSpeed(s)}
+            key={option}
+            onClick={() => setReadingSpeed(option)}
             disabled={!isContentDetected}
             className={`rounded-full border border-purple-500 px-4 py-2 transition ${
-              speed === s && isContentDetected
+              readingSpeed === option && isContentDetected
                 ? "bg-purple-500 text-white"
                 : "text-gray-600 hover:bg-purple-100"
             } ${!isContentDetected ? "cursor-not-allowed opacity-50" : ""}`}
           >
-            {s === "fast" ? "빠르게" : s === "normal" ? "보통" : "느리게"}
+            {READING_SPEED_LABEL[option]}
           </button>
         ))}
       </div>

@@ -1,6 +1,8 @@
 import { useEffect } from "react";
 
-const ReadingContent = ({ progress, setProgress, speed, onDone }) => {
+import { READING_SPEED_INTERVAL } from "../constants/readingSpeed";
+
+const ReadingContent = ({ progress, setProgress, readingSpeed, onDone }) => {
   const mockLines = [
     "첫 번째 줄 예시입니다.",
     "두 번째 줄 예시입니다.",
@@ -9,12 +11,7 @@ const ReadingContent = ({ progress, setProgress, speed, onDone }) => {
     "다섯 번째 줄 예시입니다.",
   ];
 
-  const speedMap = {
-    fast: 1000,
-    normal: 2000,
-    slow: 3000,
-  };
-  const interval = speedMap[speed] || 2000;
+  const readingSpeedInterval = READING_SPEED_INTERVAL[readingSpeed] || 2000;
 
   useEffect(() => {
     if (progress.currentLine >= progress.totalLines) {
@@ -27,14 +24,14 @@ const ReadingContent = ({ progress, setProgress, speed, onDone }) => {
         ...prev,
         currentLine: prev.currentLine + 1,
       }));
-    }, interval);
+    }, readingSpeedInterval);
 
     return () => clearInterval(timer);
   }, [
     progress.currentLine,
     progress.totalLines,
     setProgress,
-    interval,
+    readingSpeedInterval,
     onDone,
   ]);
 
