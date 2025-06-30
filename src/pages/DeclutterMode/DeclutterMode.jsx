@@ -1,6 +1,8 @@
 import { ChevronDownIcon, ChevronRightIcon } from "@heroicons/react/24/solid";
 import { useState } from "react";
 
+import ButtonPrimary from "@/components/ButtonPrimary";
+
 import Section from "./components/Section";
 import SectionScroll from "./components/SectionScroll";
 import SentenceCard from "./components/SentenceCard";
@@ -75,9 +77,9 @@ const DeclutterMode = () => {
           ))}
         </SectionScroll>
 
-        <button className="mx-4 mt-4 w-[calc(100%-2rem)] shrink-0 cursor-pointer rounded-full bg-purple-500 py-2 text-center text-sm text-white transition hover:bg-purple-600">
+        <ButtonPrimary className="mx-4 mt-4 w-[calc(100%-2rem)] shrink-0">
           정리 시작
-        </button>
+        </ButtonPrimary>
       </Section>
 
       <Section title="📜 정리된 사이트" flex="flex-[2]">

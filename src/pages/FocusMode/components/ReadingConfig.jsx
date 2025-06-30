@@ -1,3 +1,6 @@
+import ButtonPrimary from "@/components/ButtonPrimary";
+import ButtonSecondary from "@/components/ButtonSecondary";
+
 import { READING_SPEED, READING_SPEED_LABEL } from "../constants/readingSpeed";
 
 const SPEED_OPTIONS = [
@@ -45,32 +48,20 @@ const ReadingConfig = ({
 
       <div className="flex gap-2">
         {SPEED_OPTIONS.map((option) => (
-          <button
+          <ButtonSecondary
             key={option}
             onClick={() => setReadingSpeed(option)}
             disabled={!isContentDetected}
-            className={`rounded-full border border-purple-500 px-4 py-2 transition ${
-              readingSpeed === option && isContentDetected
-                ? "bg-purple-500 text-white"
-                : "text-gray-600 hover:bg-purple-100"
-            } ${!isContentDetected ? "cursor-not-allowed opacity-50" : ""}`}
+            selected={readingSpeed === option && isContentDetected}
           >
             {READING_SPEED_LABEL[option]}
-          </button>
+          </ButtonSecondary>
         ))}
       </div>
 
-      <button
-        onClick={onStart}
-        disabled={!isContentDetected}
-        className={`rounded-full px-6 py-2 transition ${
-          isContentDetected
-            ? "bg-purple-500 text-white hover:bg-purple-600"
-            : "cursor-not-allowed bg-gray-300 text-gray-500"
-        }`}
-      >
+      <ButtonPrimary onClick={onStart} disabled={!isContentDetected}>
         📖 읽기 시작
-      </button>
+      </ButtonPrimary>
     </div>
   );
 };
