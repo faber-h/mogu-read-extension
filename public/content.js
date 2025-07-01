@@ -1,4 +1,6 @@
 (() => {
+  let originalArticle;
+
   detectAndSend();
 
   chrome.runtime.onMessage.addListener((message) => {
@@ -9,6 +11,10 @@
 
       case "START_READING":
         wrapArticleWords();
+        break;
+
+      case "RESET_ARTICLE":
+        restoreOriginalArticle();
         break;
 
       default:
@@ -30,10 +36,17 @@
     const article = document.querySelector("article");
     if (!article) return;
 
+    if (article.querySelector(".mogu-word")) {
+      return;
+    }
+
+    if (!originalArticle) {
+      originalArticle = article.cloneNode(true);
+    }
+
     const paragraphs = article.querySelectorAll("p");
     paragraphs.forEach((paragraph, paragraphIndex) => {
       let wordIndexCounter = 0;
-
       const getWordIndex = () => wordIndexCounter++;
       wrapWordsInParagraph(paragraph, paragraphIndex, getWordIndex);
     });
@@ -71,5 +84,13 @@
         wrapWordsInParagraph(paragraphNode, paragraphIndex, getWordIndex);
       }
     });
+  }
+
+  function restoreOriginalArticle() {
+    const currentArticle = document.querySelector("article");
+    if (originalArticle && currentArticle) {
+      currentArticle.replaceWith(originalArticle);
+      originalArticle = null;
+    }
   }
 })();

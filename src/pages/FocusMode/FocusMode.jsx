@@ -81,9 +81,20 @@ const FocusMode = () => {
     }));
   };
 
-  const handleReset = () => {
+  const handleReset = useCallback(() => {
     setReadStatus(READ_STATUS.IDLE);
-  };
+
+    chrome.tabs.query({ active: true, currentWindow: true }, (tabs) => {
+      if (tabs.length === 0) return;
+
+      const tabId = tabs[0].id;
+      chrome.tabs
+        .sendMessage(tabId, { type: "RESET_ARTICLE" })
+        .catch((error) => {
+          console.error("원본 복원 실패:", error);
+        });
+    });
+  }, []);
 
   return (
     <div className="space-y-6 p-4">
