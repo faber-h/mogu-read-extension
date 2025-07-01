@@ -19,6 +19,11 @@ const FocusMode = () => {
   });
 
   useEffect(() => {
+    chrome.tabs.query({ active: true, currentWindow: true }, (tabs) => {
+      const tabId = tabs[0].id;
+      chrome.tabs.sendMessage(tabId, { type: "CHECK_FOCUS_MODE_REQUEST" });
+    });
+
     const listener = (message) => {
       if (message.type === "CHECK_FOCUS_MODE") {
         setIsContentDetected(message.isContentDetected);
@@ -35,6 +40,22 @@ const FocusMode = () => {
   const handleStart = useCallback(() => {
     setProgress({ currentLine: 0, totalLines: 5, elapsed: 0 });
     setReadStatus(READ_STATUS.READING);
+
+    chrome.tabs.query({ active: true, currentWindow: true }, (tabs) => {
+      if (tabs.length === 0) {
+        return;
+      }
+
+      const tabId = tabs[0].id;
+
+      chrome.tabs
+        .sendMessage(tabId, {
+          type: "START_READING",
+        })
+        .catch((err) => {
+          console.error("메시지 전달 실패:", err);
+        });
+    });
   }, []);
 
   const handleDone = useCallback(() => {
