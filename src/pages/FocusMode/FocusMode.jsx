@@ -1,4 +1,4 @@
-import { useState, useCallback } from "react";
+import { useState, useEffect, useCallback } from "react";
 
 import ReadingConfig from "./components/ReadingConfig";
 import ReadingContent from "./components/ReadingContent";
@@ -9,7 +9,7 @@ import { READING_SPEED } from "./constants/readingSpeed";
 import { READ_STATUS } from "./constants/readStatus";
 
 const FocusMode = () => {
-  const [isContentDetected] = useState(true); // 임시 고정
+  const [isContentDetected, setIsContentDetected] = useState(false);
   const [readStatus, setReadStatus] = useState(READ_STATUS.IDLE);
   const [readingSpeed, setReadingSpeed] = useState(READING_SPEED.NORMAL);
   const [progress, setProgress] = useState({
@@ -17,6 +17,20 @@ const FocusMode = () => {
     totalLines: 5,
     elapsed: 0,
   });
+
+  useEffect(() => {
+    const listener = (message) => {
+      if (message.type === "CHECK_FOCUS_MODE") {
+        setIsContentDetected(message.isContentDetected);
+      }
+    };
+
+    chrome.runtime.onMessage.addListener(listener);
+
+    return () => {
+      chrome.runtime.onMessage.removeListener(listener);
+    };
+  }, []);
 
   const handleStart = useCallback(() => {
     setProgress({ currentLine: 0, totalLines: 5, elapsed: 0 });
