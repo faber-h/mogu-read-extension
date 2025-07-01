@@ -21,5 +21,6 @@
       "js": ["content.js"]
     }
   ],
-  "permissions": ["sidePanel"]
+  "host_permissions": ["<all_urls>"],
+  "permissions": ["activeTab", "scripting", "sidePanel"]
 }
