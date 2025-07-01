@@ -33,10 +33,11 @@ const ReadingConfig = ({
       ) : (
         <>
           <p className="text-center text-sm text-red-500">
-            이 페이지에서는 <code>&lt;article&gt;</code> 또는{" "}
-            <code>&lt;main&gt;</code> 태그가 감지되지 않아
+            앗! 이 페이지에서는 몰입 읽기 모드에 필요한
             <br />
-            몰입 읽기 모드를 사용할 수 없습니다.
+            글 영역이 감지되지 않아
+            <br />
+            사용할 수 없어요.
           </p>
           <img
             src="/images/mogu_unavailable.png"
