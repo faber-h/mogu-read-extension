@@ -42,18 +42,13 @@ const FocusMode = () => {
     setReadStatus(READ_STATUS.READING);
 
     chrome.tabs.query({ active: true, currentWindow: true }, (tabs) => {
-      if (tabs.length === 0) {
-        return;
-      }
+      if (tabs.length === 0) return;
 
       const tabId = tabs[0].id;
-
       chrome.tabs
-        .sendMessage(tabId, {
-          type: "START_READING",
-        })
-        .catch((err) => {
-          console.error("메시지 전달 실패:", err);
+        .sendMessage(tabId, { type: "START_READING" })
+        .catch((error) => {
+          console.error("메시지 전달 실패:", error);
         });
     });
   }, []);
