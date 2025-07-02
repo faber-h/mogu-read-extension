@@ -1,0 +1,18 @@
+.mogu-word {
+  display: inline-block;
+}
+
+.mogu-word.passed {
+  animation: fadeOut 0.8s ease forwards;
+}
+
+@keyframes fadeOut {
+  from {
+    opacity: 1;
+    transform: translateX(0);
+  }
+  to {
+    opacity: 0;
+    transform: translateX(2px);
+  }
+}
