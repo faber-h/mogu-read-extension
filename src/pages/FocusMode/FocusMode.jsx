@@ -12,7 +12,7 @@ const FocusMode = () => {
   const [isContentDetected, setIsContentDetected] = useState(false);
   const [readStatus, setReadStatus] = useState(READ_STATUS.IDLE);
   const [readingSpeed, setReadingSpeed] = useState(READING_SPEED.NORMAL);
-  const [progress, setProgress] = useState({
+  const [readingProgress, setReadingProgress] = useState({
     currentWord: 0,
     totalWords: 0,
     elapsed: 0,
@@ -51,7 +51,7 @@ const FocusMode = () => {
           },
           (results) => {
             const totalWords = results[0].result || 0;
-            setProgress({ currentWord: 0, totalWords, elapsed: 0 });
+            setReadingProgress({ currentWord: 0, totalWords, elapsed: 0 });
             setReadStatus(READ_STATUS.READING);
           }
         );
@@ -68,14 +68,14 @@ const FocusMode = () => {
   };
 
   const handleRewind = () => {
-    setProgress((prev) => ({
+    setReadingProgress((prev) => ({
       ...prev,
       currentWord: Math.max(prev.currentWord - 1, 0),
     }));
   };
 
   const handleRestart = () => {
-    setProgress((prev) => ({
+    setReadingProgress((prev) => ({
       ...prev,
       currentWord: 0,
       elapsed: 0,
@@ -111,12 +111,15 @@ const FocusMode = () => {
       {readStatus === READ_STATUS.READING && (
         <>
           <ReadingContent
-            progress={progress}
-            setProgress={setProgress}
+            readingProgress={readingProgress}
+            setReadingProgress={setReadingProgress}
             readingSpeed={readingSpeed}
             onDone={handleDone}
           />
-          <ReadingProgress progress={progress} setProgress={setProgress} />
+          <ReadingProgress
+            readingProgress={readingProgress}
+            setReadingProgress={setReadingProgress}
+          />
           <ReadingControls
             onPause={handlePause}
             onRewind={handleRewind}
@@ -126,7 +129,10 @@ const FocusMode = () => {
       )}
 
       {readStatus === READ_STATUS.DONE && (
-        <ReadingSummary progress={progress} onReset={handleReset} />
+        <ReadingSummary
+          readingProgress={readingProgress}
+          onReset={handleReset}
+        />
       )}
     </div>
   );

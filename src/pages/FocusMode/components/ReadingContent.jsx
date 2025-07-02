@@ -2,17 +2,22 @@ import { useEffect } from "react";
 
 import { READING_SPEED_INTERVAL } from "../constants/readingSpeed";
 
-const ReadingContent = ({ progress, setProgress, readingSpeed, onDone }) => {
+const ReadingContent = ({
+  readingProgress,
+  setReadingProgress,
+  readingSpeed,
+  onDone,
+}) => {
   const readingSpeedInterval = READING_SPEED_INTERVAL[readingSpeed] || 2000;
 
   useEffect(() => {
-    if (progress.currentWord >= progress.totalWords) {
+    if (readingProgress.currentWord >= readingProgress.totalWords) {
       onDone();
       return;
     }
 
     const timer = setInterval(() => {
-      setProgress((prev) => ({
+      setReadingProgress((prev) => ({
         ...prev,
         currentWord: prev.currentWord + 1,
       }));
@@ -24,18 +29,18 @@ const ReadingContent = ({ progress, setProgress, readingSpeed, onDone }) => {
 
         chrome.tabs.sendMessage(tabId, {
           type: "UPDATE_PROGRESS",
-          currentWordIndex: progress.currentWord + 1,
+          currentWordIndex: readingProgress.currentWord + 1,
         });
       });
     }, readingSpeedInterval);
 
     return () => clearInterval(timer);
   }, [
-    progress.currentWord,
-    progress.totalWords,
+    readingProgress.currentWord,
+    readingProgress.totalWords,
     readingSpeedInterval,
     onDone,
-    setProgress,
+    setReadingProgress,
   ]);
 
   return (
@@ -43,7 +48,8 @@ const ReadingContent = ({ progress, setProgress, readingSpeed, onDone }) => {
       <div className="w-full rounded border border-purple-200 p-4 text-center">
         <p className="text-lg font-medium">👀 몰입 읽기 중</p>
         <p>
-          현재 단어: {progress.currentWord} / {progress.totalWords}
+          현재 단어: {readingProgress.currentWord} /{" "}
+          {readingProgress.totalWords}
         </p>
       </div>
     </div>

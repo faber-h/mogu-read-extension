@@ -1,16 +1,16 @@
 import { useEffect } from "react";
 
-const ReadingProgress = ({ progress, setProgress }) => {
+const ReadingProgress = ({ readingProgress, setReadingProgress }) => {
   useEffect(() => {
     const timer = setInterval(() => {
-      setProgress((prev) => ({
+      setReadingProgress((prev) => ({
         ...prev,
         elapsed: prev.elapsed + 1,
       }));
     }, 1000);
 
     return () => clearInterval(timer);
-  }, [setProgress]);
+  }, [setReadingProgress]);
 
   return (
     <div className="space-y-4">
@@ -19,11 +19,11 @@ const ReadingProgress = ({ progress, setProgress }) => {
         <div
           className="h-full rounded-full bg-purple-500 transition-all"
           style={{
-            width: `${(progress.currentWord / progress.totalWords) * 100}%`,
+            width: `${(readingProgress.currentWord / readingProgress.totalWords) * 100}%`,
           }}
         ></div>
       </div>
-      <p>경과 시간: {progress.elapsed}초</p>
+      <p>경과 시간: {readingProgress.elapsed}초</p>
     </div>
   );
 };
