@@ -17,6 +17,10 @@
         restoreOriginalArticle();
         break;
 
+      case "UPDATE_PROGRESS":
+        updateWordsProgress(message.currentWordIndex);
+        break;
+
       default:
         console.warn("처리되지 않은 메시지 타입:", message.type);
     }
@@ -82,6 +86,17 @@
         !paragraphNode.classList.contains("mogu-word")
       ) {
         wrapWordsInParagraph(paragraphNode, paragraphIndex, getWordIndex);
+      }
+    });
+  }
+
+  function updateWordsProgress(currentWordIndex) {
+    const allWords = document.querySelectorAll(".mogu-word");
+    allWords.forEach((wordElement, index) => {
+      if (index < currentWordIndex) {
+        wordElement.classList.add("passed");
+      } else {
+        wordElement.classList.remove("passed");
       }
     });
   }
