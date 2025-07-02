@@ -13,8 +13,8 @@ const FocusMode = () => {
   const [readStatus, setReadStatus] = useState(READ_STATUS.IDLE);
   const [readingSpeed, setReadingSpeed] = useState(READING_SPEED.NORMAL);
   const [progress, setProgress] = useState({
-    currentLine: 0,
-    totalLines: 5,
+    currentWord: 0,
+    totalWords: 0,
     elapsed: 0,
   });
 
@@ -38,18 +38,24 @@ const FocusMode = () => {
   }, []);
 
   const handleStart = useCallback(() => {
-    setProgress({ currentLine: 0, totalLines: 5, elapsed: 0 });
-    setReadStatus(READ_STATUS.READING);
-
     chrome.tabs.query({ active: true, currentWindow: true }, (tabs) => {
       if (tabs.length === 0) return;
 
       const tabId = tabs[0].id;
-      chrome.tabs
-        .sendMessage(tabId, { type: "START_READING" })
-        .catch((error) => {
-          console.error("메시지 전달 실패:", error);
-        });
+
+      chrome.tabs.sendMessage(tabId, { type: "START_READING" }, () => {
+        chrome.scripting.executeScript(
+          {
+            target: { tabId },
+            func: () => document.querySelectorAll(".mogu-word").length,
+          },
+          (results) => {
+            const totalWords = results[0].result || 0;
+            setProgress({ currentWord: 0, totalWords, elapsed: 0 });
+            setReadStatus(READ_STATUS.READING);
+          }
+        );
+      });
     });
   }, []);
 
@@ -64,14 +70,14 @@ const FocusMode = () => {
   const handleRewind = () => {
     setProgress((prev) => ({
       ...prev,
-      currentLine: Math.max(prev.currentLine - 1, 0),
+      currentWord: Math.max(prev.currentWord - 1, 0),
     }));
   };
 
   const handleRestart = () => {
     setProgress((prev) => ({
       ...prev,
-      currentLine: 0,
+      currentWord: 0,
       elapsed: 0,
     }));
   };

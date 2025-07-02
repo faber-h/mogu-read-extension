@@ -19,13 +19,10 @@ const ReadingProgress = ({ progress, setProgress }) => {
         <div
           className="h-full rounded-full bg-purple-500 transition-all"
           style={{
-            width: `${(progress.currentLine / progress.totalLines) * 100}%`,
+            width: `${(progress.currentWord / progress.totalWords) * 100}%`,
           }}
         ></div>
       </div>
-      <p>
-        줄 현황: {progress.currentLine} / {progress.totalLines}
-      </p>
       <p>경과 시간: {progress.elapsed}초</p>
     </div>
   );
