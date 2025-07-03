@@ -1,7 +1,9 @@
 (() => {
   let originalArticle;
+  let currentIdx = 0;
 
   detectAndSend();
+  injectMogu();
 
   chrome.runtime.onMessage.addListener((message) => {
     switch (message.type) {
@@ -11,14 +13,11 @@
 
       case "START_READING":
         wrapArticleWords();
+        startMoguEating();
         break;
 
       case "RESET_ARTICLE":
         restoreOriginalArticle();
-        break;
-
-      case "UPDATE_PROGRESS":
-        updateWordsProgress(message.currentWordIndex);
         break;
 
       default:
@@ -34,6 +33,15 @@
       type: "CHECK_FOCUS_MODE",
       isContentDetected,
     });
+  }
+
+  function injectMogu() {
+    if (document.getElementById("mogu")) return;
+
+    const mogu = document.createElement("img");
+    mogu.id = "mogu";
+    mogu.src = chrome.runtime.getURL("images/mogu-eat-motion.png");
+    document.body.appendChild(mogu);
   }
 
   function wrapArticleWords() {
@@ -90,15 +98,53 @@
     });
   }
 
-  function updateWordsProgress(currentWordIndex) {
-    const allWords = document.querySelectorAll(".mogu-word");
-    allWords.forEach((wordElement, index) => {
-      if (index < currentWordIndex) {
-        wordElement.classList.add("passed");
-      } else {
-        wordElement.classList.remove("passed");
+  function startMoguEating() {
+    const mogu = document.getElementById("mogu");
+    const allWords = Array.from(document.querySelectorAll(".mogu-word"));
+    if (!mogu || !allWords.length) return;
+
+    mogu.style.opacity = "1";
+    currentIdx = 0;
+
+    moveMogu();
+
+    function moveMogu() {
+      if (currentIdx >= allWords.length) {
+        mogu.style.opacity = "0";
+        chrome.runtime.sendMessage({
+          type: "PROGRESS_UPDATE",
+          currentWordIndex: currentIdx,
+        });
+        return;
       }
-    });
+
+      const word = allWords[currentIdx];
+      const rect = word.getBoundingClientRect();
+      const startX = rect.left + window.scrollX;
+      const endX = rect.right + window.scrollX;
+      const wordTop = rect.top + window.scrollY;
+
+      mogu.style.transition = "none";
+      mogu.style.transform = "translateX(0)";
+      mogu.style.left = `${startX}px`;
+      mogu.style.top = `${wordTop}px`;
+
+      requestAnimationFrame(() => {
+        mogu.style.transition = "transform 0.6s ease";
+        mogu.style.transform = `translateX(${endX - startX}px)`;
+      });
+
+      word.classList.add("passed");
+
+      setTimeout(() => {
+        currentIdx++;
+        chrome.runtime.sendMessage({
+          type: "PROGRESS_UPDATE",
+          currentWordIndex: currentIdx,
+        });
+        moveMogu();
+      }, 700);
+    }
   }
 
   function restoreOriginalArticle() {

@@ -6,6 +6,14 @@
   animation: fadeOut 0.8s ease forwards;
 }
 
+#mogu {
+  pointer-events: none;
+  width: 40px;
+  z-index: 9999;
+  position: absolute;
+  opacity: 0;
+}
+
 @keyframes fadeOut {
   from {
     opacity: 1;

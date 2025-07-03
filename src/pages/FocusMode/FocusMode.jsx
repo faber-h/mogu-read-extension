@@ -28,6 +28,13 @@ const FocusMode = () => {
       if (message.type === "CHECK_FOCUS_MODE") {
         setIsContentDetected(message.isContentDetected);
       }
+
+      if (message.type === "PROGRESS_UPDATE") {
+        setReadingProgress((prev) => ({
+          ...prev,
+          currentWord: message.currentWordIndex,
+        }));
+      }
     };
 
     chrome.runtime.onMessage.addListener(listener);
@@ -62,6 +69,15 @@ const FocusMode = () => {
   const handleDone = useCallback(() => {
     setReadStatus(READ_STATUS.DONE);
   }, []);
+
+  useEffect(() => {
+    if (
+      readingProgress.totalWords > 0 &&
+      readingProgress.currentWord >= readingProgress.totalWords
+    ) {
+      handleDone();
+    }
+  }, [readingProgress.currentWord, readingProgress.totalWords, handleDone]);
 
   const handlePause = () => {
     console.log("일시정지");
@@ -110,12 +126,7 @@ const FocusMode = () => {
 
       {readStatus === READ_STATUS.READING && (
         <>
-          <ReadingContent
-            readingProgress={readingProgress}
-            setReadingProgress={setReadingProgress}
-            readingSpeed={readingSpeed}
-            onDone={handleDone}
-          />
+          <ReadingContent readingProgress={readingProgress} />
           <ReadingProgress
             readingProgress={readingProgress}
             setReadingProgress={setReadingProgress}
