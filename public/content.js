@@ -125,13 +125,12 @@
       const wordTop = rect.top + window.scrollY;
 
       mogu.style.transition = "none";
-      mogu.style.transform = "translateX(0)";
       mogu.style.left = `${startX}px`;
       mogu.style.top = `${wordTop}px`;
 
       requestAnimationFrame(() => {
-        mogu.style.transition = "transform 0.6s ease";
-        mogu.style.transform = `translateX(${endX - startX}px)`;
+        mogu.style.transition = "left 0.6s ease";
+        mogu.style.left = `${endX}px`;
       });
 
       word.classList.add("passed");
