@@ -1,6 +1,8 @@
 (() => {
   let originalArticle;
   let currentIdx = 0;
+  let paused = false;
+  let timeoutId = null;
 
   detectAndSend();
   injectMogu();
@@ -13,11 +15,41 @@
 
       case "START_READING":
         wrapArticleWords();
+        paused = false;
+        currentIdx = 0;
         startMoguEating();
         break;
 
       case "RESET_ARTICLE":
         restoreOriginalArticle();
+        break;
+
+      case "PAUSE_READING":
+        paused = true;
+        clearMoguTimeout();
+        break;
+
+      case "REWIND_READING":
+        paused = false;
+        clearMoguTimeout();
+        currentIdx = Math.max(currentIdx - 1, 0);
+        updateWordsProgress(currentIdx);
+        positionMoguToCurrent();
+        startMoguEating();
+        break;
+
+      case "RESTART_READING":
+        paused = false;
+        clearMoguTimeout();
+        currentIdx = 0;
+        updateWordsProgress(currentIdx);
+        startMoguEating();
+        break;
+
+      case "RESUME_READING":
+        paused = false;
+        clearMoguTimeout();
+        startMoguEating();
         break;
 
       default:
@@ -98,52 +130,86 @@
     });
   }
 
+  function updateWordsProgress(currentIdx) {
+    const allWords = document.querySelectorAll(".mogu-word");
+    allWords.forEach((wordElement, index) => {
+      if (index < currentIdx) {
+        wordElement.classList.add("passed");
+      } else {
+        wordElement.classList.remove("passed");
+      }
+    });
+  }
+
+  function clearMoguTimeout() {
+    if (timeoutId) {
+      clearTimeout(timeoutId);
+      timeoutId = null;
+    }
+  }
+
+  function positionMoguToCurrent() {
+    const mogu = document.getElementById("mogu");
+    const allWords = document.querySelectorAll(".mogu-word");
+    if (!mogu || !allWords.length) return;
+
+    const word = allWords[currentIdx];
+    if (!word) return;
+
+    const rect = word.getBoundingClientRect();
+    mogu.style.transition = "none";
+    mogu.style.left = `${rect.left + window.scrollX}px`;
+    mogu.style.top = `${rect.top + window.scrollY}px`;
+  }
+
   function startMoguEating() {
+    clearMoguTimeout();
+
     const mogu = document.getElementById("mogu");
     const allWords = Array.from(document.querySelectorAll(".mogu-word"));
     if (!mogu || !allWords.length) return;
 
     mogu.style.opacity = "1";
-    currentIdx = 0;
+    moveMogu(allWords, mogu);
+  }
 
-    moveMogu();
+  function moveMogu(allWords, mogu) {
+    if (paused) return;
 
-    function moveMogu() {
-      if (currentIdx >= allWords.length) {
-        mogu.style.opacity = "0";
-        chrome.runtime.sendMessage({
-          type: "PROGRESS_UPDATE",
-          currentWordIndex: currentIdx,
-        });
-        return;
-      }
-
-      const word = allWords[currentIdx];
-      const rect = word.getBoundingClientRect();
-      const startX = rect.left + window.scrollX;
-      const endX = rect.right + window.scrollX;
-      const wordTop = rect.top + window.scrollY;
-
-      mogu.style.transition = "none";
-      mogu.style.left = `${startX}px`;
-      mogu.style.top = `${wordTop}px`;
-
-      requestAnimationFrame(() => {
-        mogu.style.transition = "left 0.6s ease";
-        mogu.style.left = `${endX}px`;
+    if (currentIdx >= allWords.length) {
+      mogu.style.opacity = "0";
+      chrome.runtime.sendMessage({
+        type: "PROGRESS_UPDATE",
+        currentWordIndex: currentIdx,
       });
-
-      word.classList.add("passed");
-
-      setTimeout(() => {
-        currentIdx++;
-        chrome.runtime.sendMessage({
-          type: "PROGRESS_UPDATE",
-          currentWordIndex: currentIdx,
-        });
-        moveMogu();
-      }, 700);
+      return;
     }
+
+    const word = allWords[currentIdx];
+    const rect = word.getBoundingClientRect();
+    const startX = rect.left + window.scrollX;
+    const endX = rect.right + window.scrollX;
+    const wordTop = rect.top + window.scrollY;
+
+    mogu.style.transition = "none";
+    mogu.style.left = `${startX}px`;
+    mogu.style.top = `${wordTop}px`;
+
+    requestAnimationFrame(() => {
+      mogu.style.transition = "left 0.6s ease";
+      mogu.style.left = `${endX}px`;
+    });
+
+    word.classList.add("passed");
+
+    timeoutId = setTimeout(() => {
+      currentIdx++;
+      chrome.runtime.sendMessage({
+        type: "PROGRESS_UPDATE",
+        currentWordIndex: currentIdx,
+      });
+      moveMogu(allWords, mogu);
+    }, 700);
   }
 
   function restoreOriginalArticle() {
