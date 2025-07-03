@@ -1,18 +1,33 @@
 import {
-  PauseIcon,
-  ArrowUturnLeftIcon,
   ArrowPathIcon,
+  ArrowUturnLeftIcon,
+  PauseIcon,
+  PlayIcon,
 } from "@heroicons/react/24/outline";
 
 import ButtonSecondary from "@/components/ButtonSecondary";
 
-const ReadingControls = ({ onPause, onRewind, onRestart }) => {
+const ReadingControls = ({
+  paused,
+  onPause,
+  onRewind,
+  onRestart,
+  onResume,
+}) => {
   return (
     <div className="flex items-center justify-center gap-2">
-      <ButtonSecondary onClick={onPause}>
-        <PauseIcon className="h-4 w-4" />
-        일시정지
-      </ButtonSecondary>
+      {paused ? (
+        <ButtonSecondary onClick={onResume}>
+          <PlayIcon className="h-4 w-4" />
+          재개
+        </ButtonSecondary>
+      ) : (
+        <ButtonSecondary onClick={onPause}>
+          <PauseIcon className="h-4 w-4" />
+          일시정지
+        </ButtonSecondary>
+      )}
+
       <ButtonSecondary onClick={onRewind}>
         <ArrowUturnLeftIcon className="h-4 w-4" />
         되감기

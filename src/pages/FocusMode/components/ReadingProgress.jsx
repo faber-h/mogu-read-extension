@@ -1,7 +1,9 @@
 import { useEffect } from "react";
 
-const ReadingProgress = ({ readingProgress, setReadingProgress }) => {
+const ReadingProgress = ({ readingProgress, setReadingProgress, paused }) => {
   useEffect(() => {
+    if (paused) return;
+
     const timer = setInterval(() => {
       setReadingProgress((prev) => ({
         ...prev,
@@ -10,7 +12,7 @@ const ReadingProgress = ({ readingProgress, setReadingProgress }) => {
     }, 1000);
 
     return () => clearInterval(timer);
-  }, [setReadingProgress]);
+  }, [setReadingProgress, paused]);
 
   return (
     <div className="space-y-4">

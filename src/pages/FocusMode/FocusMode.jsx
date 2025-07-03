@@ -17,6 +17,7 @@ const FocusMode = () => {
     totalWords: 0,
     elapsed: 0,
   });
+  const [paused, setPaused] = useState(false);
 
   useEffect(() => {
     chrome.tabs.query({ active: true, currentWindow: true }, (tabs) => {
@@ -79,23 +80,22 @@ const FocusMode = () => {
     }
   }, [readingProgress.currentWord, readingProgress.totalWords, handleDone]);
 
+  const sendControlMessage = (type) => {
+    chrome.tabs.query({ active: true, currentWindow: true }, (tabs) => {
+      const tabId = tabs[0].id;
+      chrome.tabs.sendMessage(tabId, { type });
+    });
+  };
+
   const handlePause = () => {
-    console.log("일시정지");
+    setPaused(true);
+    sendControlMessage("PAUSE_READING");
   };
-
-  const handleRewind = () => {
-    setReadingProgress((prev) => ({
-      ...prev,
-      currentWord: Math.max(prev.currentWord - 1, 0),
-    }));
-  };
-
-  const handleRestart = () => {
-    setReadingProgress((prev) => ({
-      ...prev,
-      currentWord: 0,
-      elapsed: 0,
-    }));
+  const handleRewind = () => sendControlMessage("REWIND_READING");
+  const handleRestart = () => sendControlMessage("RESTART_READING");
+  const handleResume = () => {
+    setPaused(false);
+    sendControlMessage("RESUME_READING");
   };
 
   const handleReset = useCallback(() => {
@@ -128,13 +128,16 @@ const FocusMode = () => {
         <>
           <ReadingContent readingProgress={readingProgress} />
           <ReadingProgress
+            paused={paused}
             readingProgress={readingProgress}
             setReadingProgress={setReadingProgress}
           />
           <ReadingControls
+            paused={paused}
             onPause={handlePause}
             onRewind={handleRewind}
             onRestart={handleRestart}
+            onResume={handleResume}
           />
         </>
       )}
