@@ -1,5 +1,10 @@
 .mogu-word {
   display: inline-block;
+  pointer-events: none;
+}
+
+*:has(.mogu-word) {
+  pointer-events: none;
 }
 
 .mogu-word.passed {
