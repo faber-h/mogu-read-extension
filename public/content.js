@@ -119,7 +119,16 @@
     return null;
   }
 
+  function expandDetailsElements() {
+    const detailsElements = document.querySelectorAll("details");
+    detailsElements.forEach((details) => {
+      details.open = true;
+    });
+  }
+
   function wrapContentWords() {
+    expandDetailsElements();
+
     const content = findContentElement();
     if (!content || content.querySelector(".mogu-word")) return;
 
