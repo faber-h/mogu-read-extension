@@ -5,7 +5,10 @@ import ReadingContent from "./components/ReadingContent";
 import ReadingControls from "./components/ReadingControls";
 import ReadingProgress from "./components/ReadingProgress";
 import ReadingSummary from "./components/ReadingSummary";
-import { READING_SPEED } from "./constants/readingSpeed";
+import {
+  READING_SPEED,
+  READING_SPEED_INTERVAL,
+} from "./constants/readingSpeed";
 import { READ_STATUS } from "./constants/readStatus";
 
 const FocusMode = () => {
@@ -51,21 +54,28 @@ const FocusMode = () => {
 
       const tabId = tabs[0].id;
 
-      chrome.tabs.sendMessage(tabId, { type: "START_READING" }, () => {
-        chrome.scripting.executeScript(
-          {
-            target: { tabId },
-            func: () => document.querySelectorAll(".mogu-word").length,
-          },
-          (results) => {
-            const totalWords = results[0].result || 0;
-            setReadingProgress({ currentWord: 0, totalWords, elapsed: 0 });
-            setReadStatus(READ_STATUS.READING);
-          }
-        );
-      });
+      chrome.tabs.sendMessage(
+        tabId,
+        {
+          type: "START_READING",
+          readingSpeed: READING_SPEED_INTERVAL[readingSpeed],
+        },
+        () => {
+          chrome.scripting.executeScript(
+            {
+              target: { tabId },
+              func: () => document.querySelectorAll(".mogu-word").length,
+            },
+            (results) => {
+              const totalWords = results[0].result || 0;
+              setReadingProgress({ currentWord: 0, totalWords, elapsed: 0 });
+              setReadStatus(READ_STATUS.READING);
+            }
+          );
+        }
+      );
     });
-  }, []);
+  }, [readingSpeed]);
 
   const handleDone = useCallback(() => {
     setReadStatus(READ_STATUS.DONE);

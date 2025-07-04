@@ -3,6 +3,7 @@
   let currentIdx = 0;
   let paused = false;
   let timeoutId = null;
+  let readingSpeed = 300;
 
   detectAndSend();
   injectMogu();
@@ -17,6 +18,7 @@
         wrapArticleWords();
         paused = false;
         currentIdx = 0;
+        readingSpeed = message.readingSpeed || 300;
         startMoguEating();
         break;
 
@@ -173,6 +175,14 @@
     moveMogu(allWords, mogu);
   }
 
+  function calcWordDuration(word) {
+    const baseLength = 4;
+    const extraChars = Math.max(word.length - baseLength, 0);
+    const extraSpeed = extraChars * 15;
+
+    return readingSpeed + extraSpeed;
+  }
+
   function moveMogu(allWords, mogu) {
     if (paused) return;
 
@@ -195,8 +205,9 @@
     mogu.style.left = `${startX}px`;
     mogu.style.top = `${wordTop}px`;
 
+    const duration = calcWordDuration(word.textContent);
     requestAnimationFrame(() => {
-      mogu.style.transition = "left 0.6s ease";
+      mogu.style.transition = `left ${duration}ms ease`;
       mogu.style.left = `${endX}px`;
     });
 
@@ -209,7 +220,7 @@
         currentWordIndex: currentIdx,
       });
       moveMogu(allWords, mogu);
-    }, 700);
+    }, duration);
   }
 
   function restoreOriginalArticle() {
