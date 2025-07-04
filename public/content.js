@@ -188,6 +188,14 @@
     const allWords = Array.from(document.querySelectorAll(".mogu-word"));
     if (!mogu || !allWords.length) return;
 
+    if (currentIdx === 0) {
+      const firstWord = allWords[currentIdx];
+      const rect = firstWord.getBoundingClientRect();
+      mogu.style.transition = "none";
+      mogu.style.left = `${rect.left + window.scrollX}px`;
+      mogu.style.top = `${rect.top + window.scrollY}px`;
+    }
+
     mogu.style.opacity = "1";
 
     moveMogu(allWords, mogu, isPreview);
