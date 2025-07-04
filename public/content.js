@@ -94,6 +94,18 @@
     document.body.appendChild(mogu);
   }
 
+  function isVisible(element) {
+    let currentElement = element;
+    while (currentElement) {
+      const style = window.getComputedStyle(currentElement);
+      if (style.display === "none" || style.visibility === "hidden") {
+        return false;
+      }
+      currentElement = currentElement.parentElement;
+    }
+    return true;
+  }
+
   function findContentElement() {
     const candidates = [
       document.querySelector("article"),
@@ -106,11 +118,15 @@
     ];
 
     for (const candidate of candidates) {
-      if (candidate) {
+      if (candidate && isVisible(candidate)) {
         const text = candidate.innerText || "";
         const wordCount = text.trim().split(/\s+/).length;
-        const paragraphCount = candidate.querySelectorAll("p, li").length || 0;
-        if (wordCount >= 30 && paragraphCount >= 2) {
+
+        const paragraphs = Array.from(
+          candidate.querySelectorAll("p, li")
+        ).filter(isVisible);
+
+        if (wordCount >= 30 && paragraphs.length >= 2) {
           return candidate;
         }
       }
@@ -136,8 +152,11 @@
       originalContent = content.cloneNode(true);
     }
 
-    const paragraphs = content.querySelectorAll("p, li");
-    paragraphs.forEach((element, elementIndex) => {
+    const elements = Array.from(content.querySelectorAll("p, li")).filter(
+      isVisible
+    );
+
+    elements.forEach((element, elementIndex) => {
       let wordIndexCounter = 0;
       const getWordIndex = () => wordIndexCounter++;
       wrapWords(element, elementIndex, getWordIndex);
