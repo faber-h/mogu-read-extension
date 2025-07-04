@@ -230,9 +230,11 @@
     mogu.style.left = `${startX}px`;
     mogu.style.top = `${wordTop}px`;
 
-    const duration = calcWordDuration(word.textContent);
+    const totalDuration = calcWordDuration(word.textContent);
+    const animationDuration = Math.min(totalDuration * 0.7, 400);
+
     requestAnimationFrame(() => {
-      mogu.style.transition = `left ${duration}ms ease`;
+      mogu.style.transition = `left ${animationDuration}ms ease`;
       mogu.style.left = `${endX}px`;
     });
 
@@ -245,7 +247,7 @@
         currentWordIndex: currentIdx,
       });
       moveMogu(allWords, mogu, isPreview);
-    }, duration);
+    }, totalDuration);
   }
 
   function resetFocusMode() {
