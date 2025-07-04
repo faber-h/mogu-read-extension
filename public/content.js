@@ -16,9 +16,8 @@
         break;
 
       case "START_READING":
-        previewMode = false;
         paused = false;
-        clearMoguTimeout();
+        resetFocusMode();
         wrapArticleWords();
         currentIdx = 0;
         readingSpeed = message.readingSpeed || 300;
