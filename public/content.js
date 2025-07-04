@@ -109,7 +109,7 @@
       if (candidate) {
         const text = candidate.innerText || "";
         const wordCount = text.trim().split(/\s+/).length;
-        const paragraphCount = candidate.querySelectorAll("p").length || 0;
+        const paragraphCount = candidate.querySelectorAll("p, li").length || 0;
         if (wordCount >= 30 && paragraphCount >= 2) {
           return candidate;
         }
@@ -127,20 +127,20 @@
       originalContent = content.cloneNode(true);
     }
 
-    const paragraphs = content.querySelectorAll("p");
-    paragraphs.forEach((paragraph, paragraphIndex) => {
+    const paragraphs = content.querySelectorAll("p, li");
+    paragraphs.forEach((element, elementIndex) => {
       let wordIndexCounter = 0;
       const getWordIndex = () => wordIndexCounter++;
-      wrapWordsInParagraph(paragraph, paragraphIndex, getWordIndex);
+      wrapWords(element, elementIndex, getWordIndex);
     });
   }
 
-  function wrapWordsInParagraph(paragraph, paragraphIndex, getWordIndex) {
-    const paragraphNodes = Array.from(paragraph.childNodes);
+  function wrapWords(element, elementIndex, getWordIndex) {
+    const nodes = Array.from(element.childNodes);
 
-    paragraphNodes.forEach((paragraphNode) => {
-      if (paragraphNode.nodeType === Node.TEXT_NODE) {
-        const text = paragraphNode.textContent.trim();
+    nodes.forEach((node) => {
+      if (node.nodeType === Node.TEXT_NODE) {
+        const text = node.textContent.trim();
         if (!text) return;
 
         const words = text.split(/\s+/).filter(Boolean);
@@ -149,7 +149,7 @@
         words.forEach((word, index) => {
           const span = document.createElement("span");
           span.className = "mogu-word";
-          span.dataset.wordId = `${paragraphIndex}-${getWordIndex()}`;
+          span.dataset.wordId = `${elementIndex}-${getWordIndex()}`;
           span.textContent = word;
 
           fragment.appendChild(span);
@@ -159,12 +159,12 @@
           }
         });
 
-        paragraphNode.replaceWith(fragment);
+        node.replaceWith(fragment);
       } else if (
-        paragraphNode.nodeType === Node.ELEMENT_NODE &&
-        !paragraphNode.classList.contains("mogu-word")
+        node.nodeType === Node.ELEMENT_NODE &&
+        !node.classList.contains("mogu-word")
       ) {
-        wrapWordsInParagraph(paragraphNode, paragraphIndex, getWordIndex);
+        wrapWords(node, elementIndex, getWordIndex);
       }
     });
   }
@@ -283,7 +283,7 @@
     clearMoguTimeout();
 
     const content = findContentElement();
-    if (originalContent && content) {
+    if (originalContent && content && content.isSameNode(content)) {
       content.replaceWith(originalContent);
       originalContent = null;
     }
