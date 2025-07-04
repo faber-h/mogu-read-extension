@@ -15,6 +15,7 @@ const FocusMode = () => {
   const [isContentDetected, setIsContentDetected] = useState(false);
   const [readStatus, setReadStatus] = useState(READ_STATUS.IDLE);
   const [readingSpeed, setReadingSpeed] = useState(READING_SPEED.NORMAL);
+  const [previewMode, setPreviewMode] = useState(false);
   const [readingProgress, setReadingProgress] = useState({
     currentWord: 0,
     totalWords: 0,
@@ -39,6 +40,10 @@ const FocusMode = () => {
           currentWord: message.currentWordIndex,
         }));
       }
+
+      if (message.type === "PREVIEW_MODE_OFF") {
+        setPreviewMode(false);
+      }
     };
 
     chrome.runtime.onMessage.addListener(listener);
@@ -48,7 +53,29 @@ const FocusMode = () => {
     };
   }, []);
 
+  const handleSpeedPreview = (newSpeed) => {
+    setReadingSpeed(newSpeed);
+    setPreviewMode(true);
+
+    chrome.tabs.query({ active: true, currentWindow: true }, (tabs) => {
+      const tabId = tabs[0].id;
+      chrome.tabs.sendMessage(tabId, {
+        type: "START_PREVIEW",
+        readingSpeed: READING_SPEED_INTERVAL[newSpeed],
+      });
+    });
+  };
+
+  const handleStopPreview = () => {
+    setPreviewMode(false);
+    chrome.tabs.query({ active: true, currentWindow: true }, (tabs) => {
+      const tabId = tabs[0].id;
+      chrome.tabs.sendMessage(tabId, { type: "STOP_PREVIEW" });
+    });
+  };
+
   const handleStart = useCallback(() => {
+    setPreviewMode(false);
     chrome.tabs.query({ active: true, currentWindow: true }, (tabs) => {
       if (tabs.length === 0) return;
 
@@ -128,7 +155,9 @@ const FocusMode = () => {
       {readStatus === READ_STATUS.IDLE && (
         <ReadingConfig
           readingSpeed={readingSpeed}
-          setReadingSpeed={setReadingSpeed}
+          onSpeedPreview={handleSpeedPreview}
+          onStopPreview={handleStopPreview}
+          previewMode={previewMode}
           onStart={handleStart}
           isContentDetected={isContentDetected}
         />

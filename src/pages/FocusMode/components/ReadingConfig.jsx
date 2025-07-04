@@ -11,7 +11,9 @@ const SPEED_OPTIONS = [
 
 const ReadingConfig = ({
   readingSpeed,
-  setReadingSpeed,
+  onSpeedPreview,
+  onStopPreview,
+  previewMode,
   onStart,
   isContentDetected,
 }) => {
@@ -47,11 +49,11 @@ const ReadingConfig = ({
         </>
       )}
 
-      <div className="flex gap-2">
+      <div className="mt-4 flex gap-2">
         {SPEED_OPTIONS.map((option) => (
           <ButtonSecondary
             key={option}
-            onClick={() => setReadingSpeed(option)}
+            onClick={() => onSpeedPreview(option)}
             disabled={!isContentDetected}
             selected={readingSpeed === option && isContentDetected}
           >
@@ -60,7 +62,25 @@ const ReadingConfig = ({
         ))}
       </div>
 
-      <ButtonPrimary onClick={onStart} disabled={!isContentDetected}>
+      <div className="min-h-4">
+        {previewMode && (
+          <div className="flex items-center text-xs text-gray-500">
+            <span>선택한 속도로 미리보기 중입니다.</span>
+            <button
+              className="ml-2 text-purple-600 underline"
+              onClick={onStopPreview}
+            >
+              미리보기 중지
+            </button>
+          </div>
+        )}
+      </div>
+
+      <ButtonPrimary
+        className="mt-2"
+        onClick={onStart}
+        disabled={!isContentDetected}
+      >
         📖 읽기 시작
       </ButtonPrimary>
     </div>

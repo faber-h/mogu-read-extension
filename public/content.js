@@ -4,6 +4,7 @@
   let paused = false;
   let timeoutId = null;
   let readingSpeed = 300;
+  let previewMode = false;
 
   detectAndSend();
   injectMogu();
@@ -15,15 +16,32 @@
         break;
 
       case "START_READING":
-        wrapArticleWords();
+        previewMode = false;
         paused = false;
+        clearMoguTimeout();
+        wrapArticleWords();
         currentIdx = 0;
         readingSpeed = message.readingSpeed || 300;
-        startMoguEating();
+        startMoguEating(previewMode);
+        break;
+
+      case "START_PREVIEW":
+        resetFocusMode();
+        previewMode = true;
+        paused = false;
+        clearMoguTimeout();
+        wrapArticleWords();
+        currentIdx = 0;
+        readingSpeed = message.readingSpeed || 300;
+        startMoguEating(previewMode);
+        break;
+
+      case "STOP_PREVIEW":
+        resetFocusMode();
         break;
 
       case "RESET_ARTICLE":
-        restoreOriginalArticle();
+        resetFocusMode();
         break;
 
       case "PAUSE_READING":
@@ -37,7 +55,7 @@
         currentIdx = Math.max(currentIdx - 1, 0);
         updateWordsProgress(currentIdx);
         positionMoguToCurrent();
-        startMoguEating();
+        startMoguEating(previewMode);
         break;
 
       case "RESTART_READING":
@@ -45,13 +63,12 @@
         clearMoguTimeout();
         currentIdx = 0;
         updateWordsProgress(currentIdx);
-        startMoguEating();
+        startMoguEating(previewMode);
         break;
 
       case "RESUME_READING":
         paused = false;
-        clearMoguTimeout();
-        startMoguEating();
+        startMoguEating(previewMode);
         break;
 
       default:
@@ -164,7 +181,7 @@
     mogu.style.top = `${rect.top + window.scrollY}px`;
   }
 
-  function startMoguEating() {
+  function startMoguEating(isPreview = false) {
     clearMoguTimeout();
 
     const mogu = document.getElementById("mogu");
@@ -172,7 +189,8 @@
     if (!mogu || !allWords.length) return;
 
     mogu.style.opacity = "1";
-    moveMogu(allWords, mogu);
+
+    moveMogu(allWords, mogu, isPreview);
   }
 
   function calcWordDuration(word) {
@@ -183,7 +201,7 @@
     return readingSpeed + extraSpeed;
   }
 
-  function moveMogu(allWords, mogu) {
+  function moveMogu(allWords, mogu, isPreview) {
     if (paused) return;
 
     if (currentIdx >= allWords.length) {
@@ -192,6 +210,13 @@
         type: "PROGRESS_UPDATE",
         currentWordIndex: currentIdx,
       });
+      return;
+    }
+
+    if (isPreview && currentIdx >= 20) {
+      mogu.style.opacity = "0";
+      resetFocusMode();
+      chrome.runtime.sendMessage({ type: "PREVIEW_MODE_OFF" });
       return;
     }
 
@@ -219,15 +244,25 @@
         type: "PROGRESS_UPDATE",
         currentWordIndex: currentIdx,
       });
-      moveMogu(allWords, mogu);
+      moveMogu(allWords, mogu, isPreview);
     }, duration);
   }
 
-  function restoreOriginalArticle() {
+  function resetFocusMode() {
+    previewMode = false;
+    clearMoguTimeout();
+
     const currentArticle = document.querySelector("article");
     if (originalArticle && currentArticle) {
       currentArticle.replaceWith(originalArticle);
       originalArticle = null;
+    }
+
+    const mogu = document.getElementById("mogu");
+    if (mogu) {
+      mogu.style.opacity = "0";
+      mogu.style.left = "0px";
+      mogu.style.top = "0px";
     }
   }
 })();
