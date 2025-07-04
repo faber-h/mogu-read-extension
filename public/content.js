@@ -1,5 +1,5 @@
 (() => {
-  let originalArticle;
+  let originalContent;
   let currentIdx = 0;
   let paused = false;
   let timeoutId = null;
@@ -18,7 +18,7 @@
       case "START_READING":
         paused = false;
         resetFocusMode();
-        wrapArticleWords();
+        wrapContentWords();
         currentIdx = 0;
         readingSpeed = message.readingSpeed || 300;
         startMoguEating(previewMode);
@@ -29,7 +29,7 @@
         previewMode = true;
         paused = false;
         clearMoguTimeout();
-        wrapArticleWords();
+        wrapContentWords();
         currentIdx = 0;
         readingSpeed = message.readingSpeed || 300;
         startMoguEating(previewMode);
@@ -76,8 +76,8 @@
   });
 
   function detectAndSend() {
-    const article = document.querySelector("article");
-    const isContentDetected = !!article;
+    const content = findContentElement();
+    const isContentDetected = !!content;
 
     chrome.runtime.sendMessage({
       type: "CHECK_FOCUS_MODE",
@@ -94,19 +94,40 @@
     document.body.appendChild(mogu);
   }
 
-  function wrapArticleWords() {
-    const article = document.querySelector("article");
-    if (!article) return;
+  function findContentElement() {
+    const candidates = [
+      document.querySelector("article"),
+      document.querySelector("main"),
+      document.querySelector("section"),
+      document.querySelector("div[id*='content']"),
+      document.querySelector("div[id*='container']"),
+      document.querySelector("div[class*='content']"),
+      document.querySelector("div[class*='container']"),
+    ];
 
-    if (article.querySelector(".mogu-word")) {
-      return;
+    for (const candidate of candidates) {
+      if (candidate) {
+        const text = candidate.innerText || "";
+        const wordCount = text.trim().split(/\s+/).length;
+        const paragraphCount = candidate.querySelectorAll("p").length || 0;
+        if (wordCount >= 30 && paragraphCount >= 2) {
+          return candidate;
+        }
+      }
     }
 
-    if (!originalArticle) {
-      originalArticle = article.cloneNode(true);
+    return null;
+  }
+
+  function wrapContentWords() {
+    const content = findContentElement();
+    if (!content || content.querySelector(".mogu-word")) return;
+
+    if (!originalContent) {
+      originalContent = content.cloneNode(true);
     }
 
-    const paragraphs = article.querySelectorAll("p");
+    const paragraphs = content.querySelectorAll("p");
     paragraphs.forEach((paragraph, paragraphIndex) => {
       let wordIndexCounter = 0;
       const getWordIndex = () => wordIndexCounter++;
@@ -261,10 +282,10 @@
     previewMode = false;
     clearMoguTimeout();
 
-    const currentArticle = document.querySelector("article");
-    if (originalArticle && currentArticle) {
-      currentArticle.replaceWith(originalArticle);
-      originalArticle = null;
+    const content = findContentElement();
+    if (originalContent && content) {
+      content.replaceWith(originalContent);
+      originalContent = null;
     }
 
     const mogu = document.getElementById("mogu");
