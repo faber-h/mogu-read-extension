@@ -26,11 +26,22 @@ const FocusMode = () => {
   const sendMessageSafely = useCallback((message, callback) => {
     chrome.tabs.query({ active: true, currentWindow: true }, (tabs) => {
       if (tabs.length === 0) {
-        console.warn("활성 탭이 없습니다.");
+        setIsContentDetected(false);
         return;
       }
 
-      const tabId = tabs[0].id;
+      const tab = tabs[0];
+      const url = tab.url || "";
+
+      if (
+        url.startsWith("chrome://") ||
+        url.startsWith("chrome-extension://")
+      ) {
+        setIsContentDetected(false);
+        return;
+      }
+
+      const tabId = tab.id;
 
       chrome.scripting.executeScript(
         {
