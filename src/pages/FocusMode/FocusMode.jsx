@@ -11,9 +11,6 @@ import { useFocusStore } from "./stores/useFocusStore";
 
 const FocusMode = () => {
   const {
-    isContentDetected,
-    paused,
-    previewMode,
     readStatus,
     readingSpeed,
     readingProgress,
@@ -228,21 +225,17 @@ const FocusMode = () => {
     <div className="space-y-6 p-4">
       {readStatus === READ_STATUS.IDLE && (
         <ReadingConfig
-          readingSpeed={readingSpeed}
           onSpeedPreview={handleSpeedPreview}
           onStopPreview={handleStopPreview}
-          previewMode={previewMode}
           onStart={handleStart}
-          isContentDetected={isContentDetected}
         />
       )}
 
       {readStatus === READ_STATUS.READING && (
         <>
-          <ReadingContent readingProgress={readingProgress} />
+          <ReadingContent />
           <ReadingProgress />
           <ReadingControls
-            paused={paused}
             onPause={handlePause}
             onRewind={handleRewind}
             onRestart={handleRestart}
