@@ -2,6 +2,7 @@ import ButtonPrimary from "@/components/ButtonPrimary";
 import ButtonSecondary from "@/components/ButtonSecondary";
 
 import { READING_SPEED, READING_SPEED_LABEL } from "../constants/readingSpeed";
+import { useFocusStore } from "../stores/useFocusStore";
 
 const SPEED_OPTIONS = [
   READING_SPEED.FAST,
@@ -9,14 +10,11 @@ const SPEED_OPTIONS = [
   READING_SPEED.SLOW,
 ];
 
-const ReadingConfig = ({
-  readingSpeed,
-  onSpeedPreview,
-  onStopPreview,
-  previewMode,
-  onStart,
-  isContentDetected,
-}) => {
+const ReadingConfig = ({ onSpeedPreview, onStopPreview, onStart }) => {
+  const isContentDetected = useFocusStore((store) => store.isContentDetected);
+  const previewMode = useFocusStore((store) => store.previewMode);
+  const readingSpeed = useFocusStore((store) => store.readingSpeed);
+
   return (
     <div className="flex flex-col items-center space-y-4">
       <h2 className="text-lg font-semibold">📖 읽기 전 준비</h2>

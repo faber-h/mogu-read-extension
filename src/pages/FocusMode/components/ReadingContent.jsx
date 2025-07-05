@@ -1,4 +1,8 @@
-const ReadingContent = ({ readingProgress }) => {
+import { useFocusStore } from "../stores/useFocusStore";
+
+const ReadingContent = () => {
+  const readingProgress = useFocusStore((store) => store.readingProgress);
+
   return (
     <div className="flex flex-col items-center space-y-4">
       <div className="w-full rounded border border-purple-200 p-4 text-center">

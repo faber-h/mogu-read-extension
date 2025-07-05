@@ -1,18 +1,26 @@
 import { useEffect } from "react";
 
-const ReadingProgress = ({ readingProgress, setReadingProgress, paused }) => {
+import { useFocusStore } from "../stores/useFocusStore";
+
+const ReadingProgress = () => {
+  const paused = useFocusStore((store) => store.paused);
+  const readingProgress = useFocusStore((store) => store.readingProgress);
+  const updateReadingProgress = useFocusStore(
+    (store) => store.updateReadingProgress
+  );
+
   useEffect(() => {
     if (paused) return;
 
     const timer = setInterval(() => {
-      setReadingProgress((prev) => ({
+      updateReadingProgress((prev) => ({
         ...prev,
         elapsed: prev.elapsed + 1,
       }));
     }, 1000);
 
     return () => clearInterval(timer);
-  }, [setReadingProgress, paused]);
+  }, [updateReadingProgress, paused]);
 
   return (
     <div className="space-y-4">

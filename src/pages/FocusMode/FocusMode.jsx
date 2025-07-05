@@ -1,112 +1,112 @@
-import { useState, useEffect, useCallback } from "react";
+import { useCallback, useEffect } from "react";
 
 import ReadingConfig from "./components/ReadingConfig";
 import ReadingContent from "./components/ReadingContent";
 import ReadingControls from "./components/ReadingControls";
 import ReadingProgress from "./components/ReadingProgress";
 import ReadingSummary from "./components/ReadingSummary";
-import {
-  READING_SPEED,
-  READING_SPEED_INTERVAL,
-} from "./constants/readingSpeed";
+import { READING_SPEED_INTERVAL } from "./constants/readingSpeed";
 import { READ_STATUS } from "./constants/readStatus";
+import { useFocusStore } from "./stores/useFocusStore";
 
 const FocusMode = () => {
-  const [isContentDetected, setIsContentDetected] = useState(false);
-  const [readStatus, setReadStatus] = useState(READ_STATUS.IDLE);
-  const [readingSpeed, setReadingSpeed] = useState(READING_SPEED.NORMAL);
-  const [previewMode, setPreviewMode] = useState(false);
-  const [readingProgress, setReadingProgress] = useState({
-    currentWord: 0,
-    totalWords: 0,
-    elapsed: 0,
-  });
-  const [paused, setPaused] = useState(false);
+  const {
+    isContentDetected,
+    paused,
+    previewMode,
+    readStatus,
+    readingSpeed,
+    readingProgress,
+    setIsContentDetected,
+    setPaused,
+    setPreviewMode,
+    setReadStatus,
+    setReadingSpeed,
+    setReadingProgress,
+    updateReadingProgress,
+  } = useFocusStore();
 
-  const sendMessageSafely = useCallback((message, callback) => {
-    chrome.tabs.query({ active: true, currentWindow: true }, (tabs) => {
-      if (tabs.length === 0) {
-        setIsContentDetected(false);
-        return;
-      }
-
-      const tab = tabs[0];
-      const url = tab.url || "";
-
-      if (
-        url.startsWith("chrome://") ||
-        url.startsWith("chrome-extension://")
-      ) {
-        setIsContentDetected(false);
-        return;
-      }
-
-      const tabId = tab.id;
-
-      chrome.scripting.executeScript(
-        {
-          target: { tabId },
-          func: () => !!window.moguReadState,
-        },
-        (results) => {
-          const [result] = results || [];
-          const alreadyInjected = result?.result;
-
-          if (alreadyInjected) {
-            chrome.tabs.sendMessage(tabId, message, (response) => {
-              if (chrome.runtime.lastError) {
-                console.warn(
-                  "메시지 전송 실패:",
-                  chrome.runtime.lastError.message
-                );
-              }
-              if (callback) callback(response);
-            });
-          } else {
-            chrome.scripting.executeScript(
-              {
-                target: { tabId },
-                files: ["content.js"],
-              },
-              () => {
-                if (chrome.runtime.lastError) {
-                  console.warn(
-                    "content.js 주입 실패:",
-                    chrome.runtime.lastError.message
-                  );
-                  return;
-                }
-                chrome.tabs.sendMessage(tabId, message, (response) => {
-                  if (chrome.runtime.lastError) {
-                    console.warn(
-                      "메시지 전송 실패:",
-                      chrome.runtime.lastError.message
-                    );
-                  }
-                  if (callback) callback(response);
-                });
-              }
-            );
-          }
-        }
-      );
-    });
-  }, []);
-
-  const executeScriptSafely = useCallback((tabId, func, callback) => {
-    chrome.scripting.executeScript(
-      {
-        target: { tabId },
-        func: func,
-      },
-      (results) => {
-        if (chrome.runtime.lastError) {
-          console.warn("스크립트 실행 실패:", chrome.runtime.lastError.message);
+  const sendMessageSafely = useCallback(
+    (message, callback) => {
+      chrome.tabs.query({ active: true, currentWindow: true }, (tabs) => {
+        if (tabs.length === 0) {
+          setIsContentDetected(false);
           return;
         }
-        if (callback) callback(results);
+
+        const tab = tabs[0];
+        const url = tab.url || "";
+
+        if (
+          url.startsWith("chrome://") ||
+          url.startsWith("chrome-extension://")
+        ) {
+          setIsContentDetected(false);
+          return;
+        }
+
+        const tabId = tab.id;
+
+        chrome.scripting.executeScript(
+          {
+            target: { tabId },
+            func: () => !!window.moguReadState,
+          },
+          (results) => {
+            const [result] = results || [];
+            const alreadyInjected = result?.result;
+
+            if (alreadyInjected) {
+              chrome.tabs.sendMessage(tabId, message, (response) => {
+                if (chrome.runtime.lastError) {
+                  console.warn(
+                    "메시지 전송 실패:",
+                    chrome.runtime.lastError.message
+                  );
+                }
+                if (callback) callback(response);
+              });
+            } else {
+              chrome.scripting.executeScript(
+                {
+                  target: { tabId },
+                  files: ["content.js"],
+                },
+                () => {
+                  if (chrome.runtime.lastError) {
+                    console.warn(
+                      "content.js 주입 실패:",
+                      chrome.runtime.lastError.message
+                    );
+                    return;
+                  }
+                  chrome.tabs.sendMessage(tabId, message, (response) => {
+                    if (chrome.runtime.lastError) {
+                      console.warn(
+                        "메시지 전송 실패:",
+                        chrome.runtime.lastError.message
+                      );
+                    }
+                    if (callback) callback(response);
+                  });
+                }
+              );
+            }
+          }
+        );
+      });
+    },
+    [setIsContentDetected]
+  );
+
+  const executeScriptSafely = useCallback((tabId, func, callback) => {
+    chrome.scripting.executeScript({ target: { tabId }, func }, (results) => {
+      if (chrome.runtime.lastError) {
+        console.warn("스크립트 실행 실패:", chrome.runtime.lastError.message);
+        return;
       }
-    );
+      if (callback) callback(results);
+    });
   }, []);
 
   useEffect(() => {
@@ -118,7 +118,7 @@ const FocusMode = () => {
       }
 
       if (message.type === "PROGRESS_UPDATE") {
-        setReadingProgress((prev) => ({
+        updateReadingProgress((prev) => ({
           ...prev,
           currentWord: message.currentWordIndex,
         }));
@@ -133,10 +133,13 @@ const FocusMode = () => {
     };
 
     chrome.runtime.onMessage.addListener(listener);
-    return () => {
-      chrome.runtime.onMessage.removeListener(listener);
-    };
-  }, [sendMessageSafely]);
+    return () => chrome.runtime.onMessage.removeListener(listener);
+  }, [
+    sendMessageSafely,
+    setIsContentDetected,
+    updateReadingProgress,
+    setPreviewMode,
+  ]);
 
   const handleSpeedPreview = (newSpeed) => {
     setReadingSpeed(newSpeed);
@@ -179,11 +182,18 @@ const FocusMode = () => {
         });
       }
     );
-  }, [readingSpeed, executeScriptSafely, sendMessageSafely]);
+  }, [
+    readingSpeed,
+    sendMessageSafely,
+    executeScriptSafely,
+    setPreviewMode,
+    setReadingProgress,
+    setReadStatus,
+  ]);
 
   const handleDone = useCallback(() => {
     setReadStatus(READ_STATUS.DONE);
-  }, []);
+  }, [setReadStatus]);
 
   useEffect(() => {
     if (
@@ -212,7 +222,7 @@ const FocusMode = () => {
   const handleReset = useCallback(() => {
     setReadStatus(READ_STATUS.IDLE);
     sendMessageSafely({ type: "RESET_ARTICLE" });
-  }, [sendMessageSafely]);
+  }, [setReadStatus, sendMessageSafely]);
 
   return (
     <div className="space-y-6 p-4">
@@ -230,11 +240,7 @@ const FocusMode = () => {
       {readStatus === READ_STATUS.READING && (
         <>
           <ReadingContent readingProgress={readingProgress} />
-          <ReadingProgress
-            paused={paused}
-            readingProgress={readingProgress}
-            setReadingProgress={setReadingProgress}
-          />
+          <ReadingProgress />
           <ReadingControls
             paused={paused}
             onPause={handlePause}
@@ -246,10 +252,7 @@ const FocusMode = () => {
       )}
 
       {readStatus === READ_STATUS.DONE && (
-        <ReadingSummary
-          readingProgress={readingProgress}
-          onReset={handleReset}
-        />
+        <ReadingSummary onReset={handleReset} />
       )}
     </div>
   );

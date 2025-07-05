@@ -7,13 +7,11 @@ import {
 
 import ButtonSecondary from "@/components/ButtonSecondary";
 
-const ReadingControls = ({
-  paused,
-  onPause,
-  onRewind,
-  onRestart,
-  onResume,
-}) => {
+import { useFocusStore } from "../stores/useFocusStore";
+
+const ReadingControls = ({ onPause, onRewind, onRestart, onResume }) => {
+  const paused = useFocusStore((store) => store.paused);
+
   return (
     <div className="flex items-center justify-center gap-2">
       {paused ? (
