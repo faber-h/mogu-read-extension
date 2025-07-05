@@ -2,6 +2,7 @@ import ButtonPrimary from "@/components/ButtonPrimary";
 import ButtonSecondary from "@/components/ButtonSecondary";
 
 import { READING_SPEED, READING_SPEED_LABEL } from "../constants/readingSpeed";
+import { useFocusActions } from "../hooks/useFocusActions";
 import { useFocusStore } from "../stores/useFocusStore";
 
 const SPEED_OPTIONS = [
@@ -10,10 +11,13 @@ const SPEED_OPTIONS = [
   READING_SPEED.SLOW,
 ];
 
-const ReadingConfig = ({ onSpeedPreview, onStopPreview, onStart }) => {
+const ReadingConfig = () => {
   const isContentDetected = useFocusStore((store) => store.isContentDetected);
   const previewMode = useFocusStore((store) => store.previewMode);
   const readingSpeed = useFocusStore((store) => store.readingSpeed);
+
+  const { handleSpeedPreview, handleStopPreview, handleStart } =
+    useFocusActions();
 
   return (
     <div className="flex flex-col items-center space-y-4">
@@ -51,7 +55,7 @@ const ReadingConfig = ({ onSpeedPreview, onStopPreview, onStart }) => {
         {SPEED_OPTIONS.map((option) => (
           <ButtonSecondary
             key={option}
-            onClick={() => onSpeedPreview(option)}
+            onClick={() => handleSpeedPreview(option)}
             disabled={!isContentDetected}
             selected={readingSpeed === option && isContentDetected}
           >
@@ -66,7 +70,7 @@ const ReadingConfig = ({ onSpeedPreview, onStopPreview, onStart }) => {
             <span>선택한 속도로 미리보기 중입니다.</span>
             <button
               className="ml-2 text-purple-600 underline"
-              onClick={onStopPreview}
+              onClick={handleStopPreview}
             >
               미리보기 중지
             </button>
@@ -76,7 +80,7 @@ const ReadingConfig = ({ onSpeedPreview, onStopPreview, onStart }) => {
 
       <ButtonPrimary
         className="mt-2"
-        onClick={onStart}
+        onClick={handleStart}
         disabled={!isContentDetected}
       >
         📖 읽기 시작

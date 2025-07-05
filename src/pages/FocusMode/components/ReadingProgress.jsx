@@ -1,26 +1,9 @@
-import { useEffect } from "react";
-
+import { useReadingTimer } from "../hooks/useReadingTimer";
 import { useFocusStore } from "../stores/useFocusStore";
 
 const ReadingProgress = () => {
-  const paused = useFocusStore((store) => store.paused);
   const readingProgress = useFocusStore((store) => store.readingProgress);
-  const updateReadingProgress = useFocusStore(
-    (store) => store.updateReadingProgress
-  );
-
-  useEffect(() => {
-    if (paused) return;
-
-    const timer = setInterval(() => {
-      updateReadingProgress((prev) => ({
-        ...prev,
-        elapsed: prev.elapsed + 1,
-      }));
-    }, 1000);
-
-    return () => clearInterval(timer);
-  }, [updateReadingProgress, paused]);
+  useReadingTimer();
 
   return (
     <div className="space-y-4">

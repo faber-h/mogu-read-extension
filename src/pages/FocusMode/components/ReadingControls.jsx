@@ -7,30 +7,33 @@ import {
 
 import ButtonSecondary from "@/components/ButtonSecondary";
 
+import { useFocusActions } from "../hooks/useFocusActions";
 import { useFocusStore } from "../stores/useFocusStore";
 
-const ReadingControls = ({ onPause, onRewind, onRestart, onResume }) => {
+const ReadingControls = () => {
   const paused = useFocusStore((store) => store.paused);
+  const { handlePause, handleResume, handleRewind, handleRestart } =
+    useFocusActions();
 
   return (
     <div className="flex items-center justify-center gap-2">
       {paused ? (
-        <ButtonSecondary onClick={onResume}>
+        <ButtonSecondary onClick={handleResume}>
           <PlayIcon className="h-4 w-4" />
           재개
         </ButtonSecondary>
       ) : (
-        <ButtonSecondary onClick={onPause}>
+        <ButtonSecondary onClick={handlePause}>
           <PauseIcon className="h-4 w-4" />
           일시정지
         </ButtonSecondary>
       )}
 
-      <ButtonSecondary onClick={onRewind}>
+      <ButtonSecondary onClick={handleRewind}>
         <ArrowUturnLeftIcon className="h-4 w-4" />
         되감기
       </ButtonSecondary>
-      <ButtonSecondary onClick={onRestart}>
+      <ButtonSecondary onClick={handleRestart}>
         <ArrowPathIcon className="h-4 w-4" />
         다시읽기
       </ButtonSecondary>
