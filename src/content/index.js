@@ -15,8 +15,13 @@ if (!window.moguReadState) {
   sendContentDetection();
   initializeMogu();
 
-  chrome.runtime.onMessage.addListener((message) => {
-    handleMessage(message, window.moguReadState);
-    return true;
+  chrome.runtime.onMessage.addListener((message, _, sendResponse) => {
+    try {
+      handleMessage(message, window.moguReadState);
+      sendResponse({ ok: true });
+      return true;
+    } catch (error) {
+      console.error("메시지 리스너 오류:", error);
+    }
   });
 }

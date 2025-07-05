@@ -47,10 +47,24 @@ export function detectContent() {
 }
 
 export function sendContentDetection() {
-  const isContentDetected = detectContent();
+  try {
+    const isContentDetected = detectContent();
 
-  chrome.runtime.sendMessage({
-    type: "CHECK_FOCUS_MODE",
-    isContentDetected,
-  });
+    chrome.runtime.sendMessage(
+      {
+        type: "CHECK_FOCUS_MODE",
+        isContentDetected,
+      },
+      () => {
+        if (chrome.runtime.lastError) {
+          console.warn(
+            "콘텐츠 감지 메시지 전송 실패:",
+            chrome.runtime.lastError.message
+          );
+        }
+      }
+    );
+  } catch (error) {
+    console.warn("콘텐츠 감지 중 오류:", error);
+  }
 }

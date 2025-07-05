@@ -30,6 +30,18 @@ export function positionMoguToCurrent(state) {
   mogu.style.top = `${rect.top + window.scrollY}px`;
 }
 
+function sendMessageSafely(message) {
+  try {
+    chrome.runtime.sendMessage(message, () => {
+      if (chrome.runtime.lastError) {
+        console.warn("메시지 전송 실패:", chrome.runtime.lastError.message);
+      }
+    });
+  } catch (error) {
+    console.warn("메시지 전송 중 오류:", error);
+  }
+}
+
 export function startMoguEating(state) {
   clearMoguTimeout(state);
 
@@ -61,7 +73,7 @@ function moveMogu(allWords, mogu, state) {
 
   if (state.currentIdx >= allWords.length) {
     mogu.style.opacity = "0";
-    chrome.runtime.sendMessage({
+    sendMessageSafely({
       type: "PROGRESS_UPDATE",
       currentWordIndex: state.currentIdx,
     });
@@ -71,7 +83,7 @@ function moveMogu(allWords, mogu, state) {
   if (state.previewMode && state.currentIdx >= 20) {
     mogu.style.opacity = "0";
     resetFocusMode(state);
-    chrome.runtime.sendMessage({ type: "PREVIEW_MODE_OFF" });
+    sendMessageSafely({ type: "PREVIEW_MODE_OFF" });
     return;
   }
 
@@ -97,7 +109,7 @@ function moveMogu(allWords, mogu, state) {
 
   state.timeoutId = setTimeout(() => {
     state.currentIdx++;
-    chrome.runtime.sendMessage({
+    sendMessageSafely({
       type: "PROGRESS_UPDATE",
       currentWordIndex: state.currentIdx,
     });

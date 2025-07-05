@@ -23,13 +23,85 @@ const FocusMode = () => {
   });
   const [paused, setPaused] = useState(false);
 
-  useEffect(() => {
+  const sendMessageSafely = useCallback((message, callback) => {
     chrome.tabs.query({ active: true, currentWindow: true }, (tabs) => {
-      const tabId = tabs[0].id;
-      chrome.tabs.sendMessage(tabId, { type: "CHECK_FOCUS_MODE_REQUEST" });
-    });
+      if (tabs.length === 0) {
+        console.warn("활성 탭이 없습니다.");
+        return;
+      }
 
-    const listener = (message) => {
+      const tabId = tabs[0].id;
+
+      chrome.scripting.executeScript(
+        {
+          target: { tabId },
+          func: () => !!window.moguReadState,
+        },
+        (results) => {
+          const [result] = results || [];
+          const alreadyInjected = result?.result;
+
+          if (alreadyInjected) {
+            chrome.tabs.sendMessage(tabId, message, (response) => {
+              if (chrome.runtime.lastError) {
+                console.warn(
+                  "메시지 전송 실패:",
+                  chrome.runtime.lastError.message
+                );
+              }
+              if (callback) callback(response);
+            });
+          } else {
+            chrome.scripting.executeScript(
+              {
+                target: { tabId },
+                files: ["content.js"],
+              },
+              () => {
+                if (chrome.runtime.lastError) {
+                  console.warn(
+                    "content.js 주입 실패:",
+                    chrome.runtime.lastError.message
+                  );
+                  return;
+                }
+                chrome.tabs.sendMessage(tabId, message, (response) => {
+                  if (chrome.runtime.lastError) {
+                    console.warn(
+                      "메시지 전송 실패:",
+                      chrome.runtime.lastError.message
+                    );
+                  }
+                  if (callback) callback(response);
+                });
+              }
+            );
+          }
+        }
+      );
+    });
+  }, []);
+
+  const executeScriptSafely = useCallback((tabId, func, callback) => {
+    chrome.scripting.executeScript(
+      {
+        target: { tabId },
+        func: func,
+      },
+      (results) => {
+        if (chrome.runtime.lastError) {
+          console.warn("스크립트 실행 실패:", chrome.runtime.lastError.message);
+          return;
+        }
+        if (callback) callback(results);
+      }
+    );
+  }, []);
+
+  useEffect(() => {
+    sendMessageSafely({ type: "CHECK_FOCUS_MODE_REQUEST" });
+
+    const listener = (message, _, sendResponse) => {
       if (message.type === "CHECK_FOCUS_MODE") {
         setIsContentDetected(message.isContentDetected);
       }
@@ -44,65 +116,59 @@ const FocusMode = () => {
       if (message.type === "PREVIEW_MODE_OFF") {
         setPreviewMode(false);
       }
+
+      sendResponse({ ok: true });
+      return true;
     };
 
     chrome.runtime.onMessage.addListener(listener);
-
     return () => {
       chrome.runtime.onMessage.removeListener(listener);
     };
-  }, []);
+  }, [sendMessageSafely]);
 
   const handleSpeedPreview = (newSpeed) => {
     setReadingSpeed(newSpeed);
     setPreviewMode(true);
 
-    chrome.tabs.query({ active: true, currentWindow: true }, (tabs) => {
-      const tabId = tabs[0].id;
-      chrome.tabs.sendMessage(tabId, {
-        type: "START_PREVIEW",
-        readingSpeed: READING_SPEED_INTERVAL[newSpeed],
-      });
+    sendMessageSafely({
+      type: "START_PREVIEW",
+      readingSpeed: READING_SPEED_INTERVAL[newSpeed],
     });
   };
 
   const handleStopPreview = () => {
     setPreviewMode(false);
-    chrome.tabs.query({ active: true, currentWindow: true }, (tabs) => {
-      const tabId = tabs[0].id;
-      chrome.tabs.sendMessage(tabId, { type: "STOP_PREVIEW" });
-    });
+    sendMessageSafely({ type: "STOP_PREVIEW" });
   };
 
   const handleStart = useCallback(() => {
     setPreviewMode(false);
-    chrome.tabs.query({ active: true, currentWindow: true }, (tabs) => {
-      if (tabs.length === 0) return;
 
-      const tabId = tabs[0].id;
+    sendMessageSafely(
+      {
+        type: "START_READING",
+        readingSpeed: READING_SPEED_INTERVAL[readingSpeed],
+      },
+      () => {
+        chrome.tabs.query({ active: true, currentWindow: true }, (tabs) => {
+          if (tabs.length === 0) return;
 
-      chrome.tabs.sendMessage(
-        tabId,
-        {
-          type: "START_READING",
-          readingSpeed: READING_SPEED_INTERVAL[readingSpeed],
-        },
-        () => {
-          chrome.scripting.executeScript(
-            {
-              target: { tabId },
-              func: () => document.querySelectorAll(".mogu-word").length,
-            },
+          const tabId = tabs[0].id;
+
+          executeScriptSafely(
+            tabId,
+            () => document.querySelectorAll(".mogu-word").length,
             (results) => {
-              const totalWords = results[0].result || 0;
+              const totalWords = results?.[0]?.result || 0;
               setReadingProgress({ currentWord: 0, totalWords, elapsed: 0 });
               setReadStatus(READ_STATUS.READING);
             }
           );
-        }
-      );
-    });
-  }, [readingSpeed]);
+        });
+      }
+    );
+  }, [readingSpeed, executeScriptSafely, sendMessageSafely]);
 
   const handleDone = useCallback(() => {
     setReadStatus(READ_STATUS.DONE);
@@ -118,10 +184,7 @@ const FocusMode = () => {
   }, [readingProgress.currentWord, readingProgress.totalWords, handleDone]);
 
   const sendControlMessage = (type) => {
-    chrome.tabs.query({ active: true, currentWindow: true }, (tabs) => {
-      const tabId = tabs[0].id;
-      chrome.tabs.sendMessage(tabId, { type });
-    });
+    sendMessageSafely({ type });
   };
 
   const handlePause = () => {
@@ -137,18 +200,8 @@ const FocusMode = () => {
 
   const handleReset = useCallback(() => {
     setReadStatus(READ_STATUS.IDLE);
-
-    chrome.tabs.query({ active: true, currentWindow: true }, (tabs) => {
-      if (tabs.length === 0) return;
-
-      const tabId = tabs[0].id;
-      chrome.tabs
-        .sendMessage(tabId, { type: "RESET_ARTICLE" })
-        .catch((error) => {
-          console.error("원본 복원 실패:", error);
-        });
-    });
-  }, []);
+    sendMessageSafely({ type: "RESET_ARTICLE" });
+  }, [sendMessageSafely]);
 
   return (
     <div className="space-y-6 p-4">
