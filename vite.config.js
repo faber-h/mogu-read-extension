@@ -15,4 +15,27 @@ export default defineConfig({
       "@": path.resolve(__dirname, "src"),
     },
   },
+  build: {
+    rollupOptions: {
+      input: {
+        main: "./index.html",
+        content: "./src/content/index.js",
+      },
+      output: {
+        entryFileNames: (chunkInfo) => {
+          if (chunkInfo.name === "content") {
+            return "[name].js";
+          }
+          return "[name].[hash].js";
+        },
+        chunkFileNames: (chunkInfo) => {
+          if (chunkInfo.facadeModuleId?.includes("content/")) {
+            return "content/[name].[hash].js";
+          }
+          return "[name].[hash].js";
+        },
+        assetFileNames: "[name].[ext]",
+      },
+    },
+  },
 });
