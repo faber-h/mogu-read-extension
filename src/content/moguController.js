@@ -1,5 +1,4 @@
 import { findContentElement } from "./contentDetector.js";
-import { state } from "./state.js";
 
 export function initializeMogu() {
   if (document.getElementById("mogu")) return;
@@ -10,14 +9,14 @@ export function initializeMogu() {
   document.body.appendChild(mogu);
 }
 
-export function clearMoguTimeout() {
+export function clearMoguTimeout(state) {
   if (state.timeoutId) {
     clearTimeout(state.timeoutId);
     state.timeoutId = null;
   }
 }
 
-export function positionMoguToCurrent() {
+export function positionMoguToCurrent(state) {
   const mogu = document.getElementById("mogu");
   const allWords = document.querySelectorAll(".mogu-word");
   if (!mogu || !allWords.length) return;
@@ -31,8 +30,8 @@ export function positionMoguToCurrent() {
   mogu.style.top = `${rect.top + window.scrollY}px`;
 }
 
-export function startMoguEating() {
-  clearMoguTimeout();
+export function startMoguEating(state) {
+  clearMoguTimeout(state);
 
   const mogu = document.getElementById("mogu");
   const allWords = Array.from(document.querySelectorAll(".mogu-word"));
@@ -47,17 +46,17 @@ export function startMoguEating() {
   }
 
   mogu.style.opacity = "1";
-  moveMogu(allWords, mogu);
+  moveMogu(allWords, mogu, state);
 }
 
-function calcWordDuration(word) {
+function calcWordDuration(word, state) {
   const baseLength = 4;
   const extraChars = Math.max(word.length - baseLength, 0);
   const extraSpeed = extraChars * 15;
   return state.readingSpeed + extraSpeed;
 }
 
-function moveMogu(allWords, mogu) {
+function moveMogu(allWords, mogu, state) {
   if (state.paused) return;
 
   if (state.currentIdx >= allWords.length) {
@@ -71,7 +70,7 @@ function moveMogu(allWords, mogu) {
 
   if (state.previewMode && state.currentIdx >= 20) {
     mogu.style.opacity = "0";
-    resetFocusMode();
+    resetFocusMode(state);
     chrome.runtime.sendMessage({ type: "PREVIEW_MODE_OFF" });
     return;
   }
@@ -86,7 +85,7 @@ function moveMogu(allWords, mogu) {
   mogu.style.left = `${startX}px`;
   mogu.style.top = `${wordTop}px`;
 
-  const totalDuration = calcWordDuration(word.textContent);
+  const totalDuration = calcWordDuration(word.textContent, state);
   const animationDuration = Math.min(totalDuration * 0.7, 400);
 
   requestAnimationFrame(() => {
@@ -102,13 +101,13 @@ function moveMogu(allWords, mogu) {
       type: "PROGRESS_UPDATE",
       currentWordIndex: state.currentIdx,
     });
-    moveMogu(allWords, mogu);
+    moveMogu(allWords, mogu, state);
   }, totalDuration);
 }
 
-export function resetFocusMode() {
+export function resetFocusMode(state) {
   state.previewMode = false;
-  clearMoguTimeout();
+  clearMoguTimeout(state);
 
   const content = findContentElement();
   if (state.originalContent && content && content.isSameNode(content)) {

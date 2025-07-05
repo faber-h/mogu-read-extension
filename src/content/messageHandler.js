@@ -5,10 +5,9 @@ import {
   startMoguEating,
   resetFocusMode,
 } from "./moguController.js";
-import { state } from "./state.js";
 import { wrapContentWords, updateWordsProgress } from "./wordWrapper.js";
 
-export function handleMessage(message) {
+export function handleMessage(message, state) {
   switch (message.type) {
     case "CHECK_FOCUS_MODE_REQUEST":
       sendContentDetection();
@@ -16,54 +15,54 @@ export function handleMessage(message) {
 
     case "START_READING":
       state.paused = false;
-      resetFocusMode();
-      wrapContentWords();
+      resetFocusMode(state);
+      wrapContentWords(state);
       state.currentIdx = 0;
       state.readingSpeed = message.readingSpeed || 300;
-      startMoguEating();
+      startMoguEating(state);
       break;
 
     case "START_PREVIEW":
-      resetFocusMode();
+      resetFocusMode(state);
       state.previewMode = true;
       state.paused = false;
-      clearMoguTimeout();
-      wrapContentWords();
+      clearMoguTimeout(state);
+      wrapContentWords(state);
       state.currentIdx = 0;
       state.readingSpeed = message.readingSpeed || 300;
-      startMoguEating();
+      startMoguEating(state);
       break;
 
     case "STOP_PREVIEW":
     case "RESET_ARTICLE":
-      resetFocusMode();
+      resetFocusMode(state);
       break;
 
     case "PAUSE_READING":
       state.paused = true;
-      clearMoguTimeout();
+      clearMoguTimeout(state);
       break;
 
     case "REWIND_READING":
       state.paused = false;
-      clearMoguTimeout();
+      clearMoguTimeout(state);
       state.currentIdx = Math.max(state.currentIdx - 1, 0);
-      updateWordsProgress();
-      positionMoguToCurrent();
-      startMoguEating();
+      updateWordsProgress(state);
+      positionMoguToCurrent(state);
+      startMoguEating(state);
       break;
 
     case "RESTART_READING":
       state.paused = false;
-      clearMoguTimeout();
+      clearMoguTimeout(state);
       state.currentIdx = 0;
-      updateWordsProgress();
-      startMoguEating();
+      updateWordsProgress(state);
+      startMoguEating(state);
       break;
 
     case "RESUME_READING":
       state.paused = false;
-      startMoguEating();
+      startMoguEating(state);
       break;
 
     default:

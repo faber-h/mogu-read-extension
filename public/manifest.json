@@ -19,12 +19,13 @@
     {
       "matches": ["<all_urls>"],
       "js": ["content.js"],
-      "css": ["content.css"]
+      "css": ["content.css"],
+      "type": "module"
     }
   ],
   "web_accessible_resources": [
     {
-      "resources": ["images/mogu-eat-motion.png"],
+      "resources": ["images/*"],
       "matches": ["<all_urls>"]
     }
   ],

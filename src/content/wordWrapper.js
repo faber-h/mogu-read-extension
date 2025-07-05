@@ -1,5 +1,4 @@
 import { findContentElement, isVisible } from "./contentDetector.js";
-import { state } from "./state.js";
 
 export function expandDetailsElements() {
   const detailsElements = document.querySelectorAll("details");
@@ -8,7 +7,7 @@ export function expandDetailsElements() {
   });
 }
 
-export function wrapContentWords() {
+export function wrapContentWords(state) {
   expandDetailsElements();
 
   const content = findContentElement();
@@ -63,7 +62,7 @@ function wrapWords(element, elementIndex, getWordIndex) {
   });
 }
 
-export function updateWordsProgress() {
+export function updateWordsProgress(state) {
   const allWords = document.querySelectorAll(".mogu-word");
   allWords.forEach((wordElement, index) => {
     if (index < state.currentIdx) {

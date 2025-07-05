@@ -22,6 +22,7 @@ export default defineConfig({
         content: "./src/content/index.js",
       },
       output: {
+        format: "es",
         entryFileNames: (chunkInfo) => {
           if (chunkInfo.name === "content") {
             return "[name].js";
