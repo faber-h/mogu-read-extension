@@ -74,10 +74,12 @@ export function useFocusActions() {
   };
 
   const handleRewind = () => {
+    setPaused(false);
     sendMessageSafely({ type: "REWIND_READING" });
   };
 
   const handleRestart = () => {
+    setPaused(false);
     sendMessageSafely({ type: "RESTART_READING" });
   };
 
