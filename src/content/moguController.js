@@ -107,10 +107,16 @@ function moveMogu(allWords, mogu, state) {
 
   word.classList.add("passed");
 
-  word.scrollIntoView({
-    behavior: "smooth",
-    block: "center",
-  });
+  const windowHeight = window.innerHeight;
+  const windowCenterY = windowHeight / 2;
+  const distanceToCenter = Math.abs(rect.top - windowCenterY);
+
+  if (distanceToCenter > 50) {
+    word.scrollIntoView({
+      behavior: "smooth",
+      block: "center",
+    });
+  }
 
   state.timeoutId = setTimeout(() => {
     state.currentIdx++;
