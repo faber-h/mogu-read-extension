@@ -107,6 +107,11 @@ function moveMogu(allWords, mogu, state) {
 
   word.classList.add("passed");
 
+  word.scrollIntoView({
+    behavior: "smooth",
+    block: "center",
+  });
+
   state.timeoutId = setTimeout(() => {
     state.currentIdx++;
     sendMessageSafely({
