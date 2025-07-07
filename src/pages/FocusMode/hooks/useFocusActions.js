@@ -83,11 +83,18 @@ export function useFocusActions() {
     sendMessageSafely({ type: "RESTART_READING" });
   };
 
-  const handleReset = () => {
+  const resetReadingStore = () => {
     setReadingProgress({ currentWord: 0, totalWords: 0, elapsed: 0 });
     setPaused(false);
+    setPreviewMode(false);
     setReadStatus(READ_STATUS.IDLE);
-    sendMessageSafely({ type: "RESET_ARTICLE" });
+  };
+
+  const handleReset = (includeContentReset = true) => {
+    resetReadingStore();
+    if (includeContentReset) {
+      sendMessageSafely({ type: "RESET_ARTICLE" });
+    }
   };
 
   return {

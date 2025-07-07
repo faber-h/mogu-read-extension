@@ -1,4 +1,5 @@
 import { sendContentDetection } from "./contentDetector.js";
+import { handleVisibilityChange } from "./handleVisibilityChange";
 import { handleMessage } from "./messageHandler.js";
 import { initializeMogu } from "./moguController.js";
 
@@ -14,6 +15,10 @@ if (!window.moguReadState) {
 
   sendContentDetection();
   initializeMogu();
+
+  document.addEventListener("visibilitychange", () => {
+    handleVisibilityChange(window.moguReadState);
+  });
 
   chrome.runtime.onMessage.addListener((message, _, sendResponse) => {
     try {

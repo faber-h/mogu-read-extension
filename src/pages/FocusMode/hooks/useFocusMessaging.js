@@ -2,6 +2,7 @@ import { useEffect } from "react";
 
 import { useChromeExtension } from "@/hooks/useChromeExtension";
 
+import { useFocusActions } from "../hooks/useFocusActions";
 import { useFocusStore } from "../stores/useFocusStore";
 
 export function useFocusMessaging() {
@@ -14,6 +15,7 @@ export function useFocusMessaging() {
   const setPreviewMode = useFocusStore((store) => store.setPreviewMode);
 
   const { sendMessageSafely } = useChromeExtension();
+  const { handleReset } = useFocusActions();
 
   useEffect(() => {
     sendMessageSafely({ type: "CHECK_FOCUS_MODE_REQUEST" });
@@ -34,6 +36,10 @@ export function useFocusMessaging() {
         setPreviewMode(false);
       }
 
+      if (message.type === "FOCUS_MODE_RESET") {
+        handleReset(false);
+      }
+
       sendResponse({ ok: true });
       return true;
     };
@@ -46,5 +52,6 @@ export function useFocusMessaging() {
     updateReadingProgress,
     setPreviewMode,
     sendMessageSafely,
+    handleReset,
   ]);
 }
