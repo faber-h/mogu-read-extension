@@ -98,7 +98,7 @@ function moveMogu(allWords, mogu, state) {
   mogu.style.top = `${wordTop}px`;
 
   const totalDuration = calcWordDuration(word.textContent, state);
-  const animationDuration = Math.min(totalDuration * 0.7, 400);
+  const animationDuration = Math.floor(totalDuration * 0.7);
 
   requestAnimationFrame(() => {
     mogu.style.transition = `left ${animationDuration}ms ease`;
