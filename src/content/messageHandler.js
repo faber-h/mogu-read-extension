@@ -34,7 +34,7 @@ export function handleMessage(message, state) {
       break;
 
     case "STOP_PREVIEW":
-    case "RESET_ARTICLE":
+    case "RESET_FOCUS_CONTENT":
       resetFocusMode(state);
       break;
 

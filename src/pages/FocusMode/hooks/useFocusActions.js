@@ -93,7 +93,7 @@ export function useFocusActions() {
   const handleReset = (includeContentReset = true) => {
     resetReadingStore();
     if (includeContentReset) {
-      sendMessageSafely({ type: "RESET_ARTICLE" });
+      sendMessageSafely({ type: "RESET_FOCUS_CONTENT" });
     }
   };
 
