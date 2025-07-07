@@ -138,4 +138,6 @@ export function resetFocusMode(state) {
     mogu.style.left = "0px";
     mogu.style.top = "0px";
   }
+
+  window.scrollTo({ top: 0, behavior: "instant" });
 }
