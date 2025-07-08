@@ -6,23 +6,10 @@ import ButtonPrimary from "@/components/ButtonPrimary";
 import Section from "./components/Section";
 import SectionScroll from "./components/SectionScroll";
 import SentenceCard from "./components/SentenceCard";
+import { useSelectedSentences } from "./hooks/useSelectedSentences";
 
 const DeclutterMode = () => {
-  const [selectedSentences, setSelectedSentences] = useState([
-    "이 문장을 제거합니다.",
-    "불필요한 부분입니다.",
-    "React에 대한 설명입니다.",
-    "React에 대한 설명입니다.",
-    "React에 대한 설명입니다.",
-    "React에 대한 설명입니다.",
-    "React에 대한 설명입니다.",
-    "React에 대한 설명입니다.",
-    "React에 대한 설명입니다.",
-    "React에 대한 설명입니다.",
-    "React에 대한 설명입니다.",
-    "React에 대한 설명입니다.",
-    "React에 대한 설명입니다.",
-  ]);
+  const { selectedSentences, removeSentence } = useSelectedSentences();
 
   const [history, setHistory] = useState([
     {
@@ -36,10 +23,6 @@ const DeclutterMode = () => {
       sentences: ["다른 문장 1", "다른 문장 2"],
     },
   ]);
-
-  const removeSelected = (idx) => {
-    setSelectedSentences((prev) => prev.filter((_, i) => i !== idx));
-  };
 
   const toggleSite = (idx) => {
     setHistory((prev) =>
@@ -68,11 +51,11 @@ const DeclutterMode = () => {
     <div className="flex h-full flex-col gap-4 overflow-hidden">
       <Section title="📑 선택된 문장" flex="flex-[3]">
         <SectionScroll>
-          {selectedSentences.map((sentence, idx) => (
+          {selectedSentences.map((sentence) => (
             <SentenceCard
-              key={idx}
-              text={sentence}
-              onRemove={() => removeSelected(idx)}
+              key={sentence.id}
+              text={sentence.text}
+              onRemove={() => removeSentence(sentence.id)}
             />
           ))}
         </SectionScroll>
