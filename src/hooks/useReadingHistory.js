@@ -1,5 +1,6 @@
 import { useCallback } from "react";
 
+import { generateId } from "@/utils/generateId";
 import {
   READING_HISTORY_KEY,
   saveReadingRecord,
@@ -7,7 +8,6 @@ import {
   clearReadingHistory,
   getReadingStatistics,
   extractDomain,
-  generateRecordId,
 } from "@/utils/readingHistory";
 
 import { useChromeExtension } from "./useChromeExtension";
@@ -28,7 +28,7 @@ export function useReadingHistory() {
         }
 
         const record = {
-          id: generateRecordId(),
+          id: generateId(),
           url: tab.url,
           title: tab.title || "-",
           domain: extractDomain(tab.url),

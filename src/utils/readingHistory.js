@@ -127,17 +127,3 @@ export const extractDomain = (url) => {
     return url;
   }
 };
-
-export const generateRecordId = () => {
-  const randomBytes = crypto.getRandomValues(new Uint8Array(8));
-  const hexString = Array.from(randomBytes, (byte) =>
-    byte.toString(16).padStart(2, "0")
-  ).join("");
-  const recordId =
-    `${hexString.slice(0, 4)}-` +
-    `${hexString.slice(4, 8)}-` +
-    `${hexString.slice(8, 12)}-` +
-    `${hexString.slice(12, 16)}`;
-
-  return recordId;
-};
