@@ -1,5 +1,9 @@
 import { sendContentDetection } from "./contentDetector.js";
-import { setupVisibilityListener, setupMessageListener } from "./listeners.js";
+import {
+  setupVisibilityListener,
+  setupMessageListener,
+  setupSelectionListeners,
+} from "./listeners.js";
 import { initializeMogu } from "./moguController.js";
 
 if (!window.moguReadState) {
@@ -17,4 +21,5 @@ if (!window.moguReadState) {
 
   setupVisibilityListener(window.moguReadState);
   setupMessageListener(window.moguReadState);
+  setupSelectionListeners();
 }
