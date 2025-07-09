@@ -1,6 +1,6 @@
 import { sendDuplicateToast } from "./moguNotifier";
+import { wrapSelectionWithMoguWord } from "./moguWordActions";
 import { getDuplicateSelectionInfo } from "./selectionDuplicateCheck";
-import { wrapSelectionWithMoguWord } from "./wrapSelection";
 
 export function getSelectedTextDataList() {
   const userSelection = window.getSelection();

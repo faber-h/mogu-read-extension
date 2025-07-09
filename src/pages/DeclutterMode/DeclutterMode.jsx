@@ -65,6 +65,7 @@ const DeclutterMode = () => {
           {selectedSentences.map((sentence) => (
             <SentenceCard
               key={sentence.id}
+              sentence={sentence}
               text={sentence.text}
               onRemove={() => removeSentence(sentence.id)}
             />

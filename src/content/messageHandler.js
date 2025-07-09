@@ -6,7 +6,7 @@ import {
   startMoguEating,
   resetFocusMode,
 } from "./moguController.js";
-import { unwrapMoguWord } from "./unwrapSelection.js";
+import { unwrapMoguWord, highlightMoguWord } from "./moguWordActions.js";
 import { wrapContentWords, updateWordsProgress } from "./wordWrapper.js";
 
 export function handleMessage(message, state) {
@@ -73,6 +73,10 @@ export function handleMessage(message, state) {
 
     case "REMOVE_SENTENCE":
       unwrapMoguWord(message.removeId);
+      break;
+
+    case "HIGHLIGHT_SENTENCE":
+      highlightMoguWord(message.sentenceId);
       break;
 
     default:

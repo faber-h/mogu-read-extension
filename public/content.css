@@ -29,6 +29,14 @@
   animation: moguPulse 0.8s ease-in-out infinite;
 }
 
+.mogu-word-highlighted {
+  background-color: #fef3c7 !important;
+  border: 2px solid #f59e0b !important;
+  border-radius: 4px !important;
+  box-shadow: 0 0 8px rgba(245, 158, 11, 0.3) !important;
+  transition: all 0.3s ease !important;
+}
+
 @media (prefers-color-scheme: dark) {
   .mogu-word.mogu-target {
     background-color: rgba(139, 92, 246, 0.7);
