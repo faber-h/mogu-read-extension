@@ -67,7 +67,7 @@ export function handleMessage(message, state) {
       break;
 
     case "DECLUTTER":
-      executeDeclutter(message.groupedBySelector);
+      executeDeclutter(message.wordIds);
       break;
 
     default:

@@ -50,18 +50,11 @@ const DeclutterMode = () => {
   };
 
   const handleDeclutter = () => {
-    const groupedBySelector = selectedSentences.reduce((acc, sentence) => {
-      acc[sentence.selector] = acc[sentence.selector] || [];
-      acc[sentence.selector].push({
-        startOffset: sentence.startOffset,
-        endOffset: sentence.endOffset,
-      });
-      return acc;
-    }, {});
+    const wordIds = selectedSentences.map((sentence) => sentence.id);
 
     sendMessageSafely({
       type: "DECLUTTER",
-      groupedBySelector,
+      wordIds,
     });
   };
 

@@ -1,14 +1,12 @@
-import { removeSelectedRanges } from "./removeSelectedRanges.js";
+export function executeDeclutter(wordIds) {
+  if (!wordIds || !wordIds.length) return;
 
-export function executeDeclutter(groupedBySelector) {
-  Object.entries(groupedBySelector).forEach(([selector, selectedRanges]) => {
-    const targetElement = document.querySelector(selector);
-    if (!targetElement) return;
-
-    const updatedText = removeSelectedRanges(
-      targetElement.textContent,
-      selectedRanges
+  wordIds.forEach((wordId) => {
+    const moguWordElement = document.querySelector(
+      `[data-word-id="${wordId}"]`
     );
-    targetElement.textContent = updatedText;
+    if (moguWordElement) {
+      moguWordElement.remove();
+    }
   });
 }
