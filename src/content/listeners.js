@@ -21,25 +21,15 @@ export function setupMessageListener(state) {
 }
 
 export function setupSelectionListeners() {
-  let lastSelections = [];
-
   document.addEventListener("mouseup", () => {
     const selectionList = getSelectedTextDataList();
     if (!selectionList.length) return;
 
     selectionList.forEach((data) => {
-      if (lastSelections.includes(data.id)) return;
-
       chrome.runtime.sendMessage({
         type: "ADD_SENTENCE",
         payload: data,
       });
-
-      lastSelections.push(data.id);
     });
-  });
-
-  document.addEventListener("mousedown", () => {
-    lastSelections = [];
   });
 }

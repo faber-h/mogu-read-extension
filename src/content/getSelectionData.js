@@ -3,41 +3,142 @@ export function getSelectedTextDataList() {
   if (!userSelection || userSelection.isCollapsed) return [];
 
   const selectedRange = userSelection.getRangeAt(0);
-  const selectedFragment = selectedRange.cloneContents();
 
-  const textIterator = document.createTreeWalker(
-    selectedFragment,
-    NodeFilter.SHOW_TEXT
-  );
-
-  const selectedTextList = [];
-
-  while (textIterator.nextNode()) {
-    const rawText = textIterator.currentNode.textContent;
-    if (rawText.trim().length === 0) continue;
-    const currentText = rawText;
-
-    const parentElementOfSelection = selectedRange.startContainer.parentElement;
-    const uniqueCssSelector = getUniqueCssSelector(parentElementOfSelection);
-
-    const preRange = document.createRange();
-    preRange.setStart(parentElementOfSelection, 0);
-    preRange.setEnd(selectedRange.startContainer, selectedRange.startOffset);
-
-    const startOffset = preRange.toString().length;
-    const endOffset = startOffset + currentText.length;
-
-    selectedTextList.push({
-      text: currentText,
-      selector: uniqueCssSelector,
-      url: window.location.href,
-      id: generateId(),
-      startOffset,
-      endOffset,
+  const duplicateInfo = getDuplicateSelectionInfo(selectedRange);
+  if (duplicateInfo) {
+    chrome.runtime.sendMessage({
+      type: "SHOW_DUPLICATE_TOAST",
+      payload: {
+        existingText: duplicateInfo.existingText,
+      },
     });
+    return [];
   }
 
-  return selectedTextList;
+  const wrappedData = wrapSelectionWithMoguWord(selectedRange);
+
+  return wrappedData ? [wrappedData] : [];
+}
+
+function getDuplicateSelectionInfo(selectedRange) {
+  const startContainer = selectedRange.startContainer;
+  const endContainer = selectedRange.endContainer;
+
+  const startMoguWord = findMoguWordAncestor(startContainer);
+  if (startMoguWord) {
+    return {
+      existingText: startMoguWord.textContent,
+      element: startMoguWord,
+    };
+  }
+
+  if (startContainer !== endContainer) {
+    const endMoguWord = findMoguWordAncestor(endContainer);
+    if (endMoguWord) {
+      return {
+        existingText: endMoguWord.textContent,
+        element: endMoguWord,
+      };
+    }
+  }
+
+  const commonAncestor = selectedRange.commonAncestorContainer;
+  const walker = document.createTreeWalker(
+    commonAncestor,
+    NodeFilter.SHOW_ALL,
+    {
+      acceptNode: function (node) {
+        return selectedRange.intersectsNode(node)
+          ? NodeFilter.FILTER_ACCEPT
+          : NodeFilter.FILTER_REJECT;
+      },
+    }
+  );
+
+  let node;
+  while ((node = walker.nextNode())) {
+    const moguWord = findMoguWordAncestor(node);
+    if (moguWord) {
+      return {
+        existingText: moguWord.textContent,
+        element: moguWord,
+      };
+    }
+  }
+
+  return null;
+}
+
+function findMoguWordAncestor(node) {
+  let current = node;
+
+  if (current.nodeType === Node.TEXT_NODE) {
+    current = current.parentElement;
+  }
+
+  while (current && current.nodeType === Node.ELEMENT_NODE) {
+    if (current.classList && current.classList.contains("mogu-word")) {
+      return current;
+    }
+    current = current.parentElement;
+  }
+
+  return null;
+}
+
+function wrapSelectionWithMoguWord(selectedRange) {
+  try {
+    const selectedText = selectedRange.toString();
+    if (!selectedText) return null;
+
+    const span = document.createElement("span");
+    span.className = "mogu-word";
+    span.dataset.wordId = generateId();
+
+    const contents = selectedRange.extractContents();
+    span.appendChild(contents);
+
+    selectedRange.insertNode(span);
+
+    window.getSelection().removeAllRanges();
+
+    return {
+      text: selectedText,
+      selector: getUniqueCssSelector(span.parentElement),
+      url: window.location.href,
+      id: span.dataset.wordId,
+      startOffset: getTextOffset(span),
+      endOffset: getTextOffset(span) + selectedText.length,
+    };
+  } catch {
+    return null;
+  }
+}
+
+function getTextOffset(element) {
+  const parent = element.parentElement;
+  if (!parent) return 0;
+
+  let offset = 0;
+  let walker = document.createTreeWalker(
+    parent,
+    NodeFilter.SHOW_TEXT,
+    null,
+    false
+  );
+
+  let node;
+  while ((node = walker.nextNode())) {
+    if (
+      node.parentElement === element ||
+      element.contains(node.parentElement)
+    ) {
+      break;
+    }
+    offset += node.textContent.length;
+  }
+
+  return offset;
 }
 
 function getUniqueCssSelector(targetElement) {
