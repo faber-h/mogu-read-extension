@@ -35,17 +35,14 @@ export function useSelectedSentences() {
     for (const existing of existingSentences) {
       if (existing.selector !== incomingSentence.selector) continue;
 
-      const existingWords = existing.text.split(/\s+/);
-      const incomingWords = incomingSentence.text.split(/\s+/);
+      const existingStart = existing.startOffset;
+      const existingEnd = existing.endOffset;
+      const incomingStart = incomingSentence.startOffset;
+      const incomingEnd = incomingSentence.endOffset;
 
-      const wordOverlap = incomingWords.some((word) =>
-        existingWords.some(
-          (existingWord) =>
-            existingWord.includes(word) || word.includes(existingWord)
-        )
-      );
-
-      if (wordOverlap) {
+      const isOverlap =
+        existingStart < incomingEnd && existingEnd > incomingStart;
+      if (isOverlap) {
         return existing;
       }
     }

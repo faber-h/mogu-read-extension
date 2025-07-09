@@ -13,17 +13,27 @@ export function getSelectedTextDataList() {
   const selectedTextList = [];
 
   while (textIterator.nextNode()) {
-    const currentText = textIterator.currentNode.textContent.trim();
-    if (currentText.length === 0) continue;
+    const rawText = textIterator.currentNode.textContent;
+    if (rawText.trim().length === 0) continue;
+    const currentText = rawText;
 
     const parentElementOfSelection = selectedRange.startContainer.parentElement;
     const uniqueCssSelector = getUniqueCssSelector(parentElementOfSelection);
+
+    const preRange = document.createRange();
+    preRange.setStart(parentElementOfSelection, 0);
+    preRange.setEnd(selectedRange.startContainer, selectedRange.startOffset);
+
+    const startOffset = preRange.toString().length;
+    const endOffset = startOffset + currentText.length;
 
     selectedTextList.push({
       text: currentText,
       selector: uniqueCssSelector,
       url: window.location.href,
       id: generateId(),
+      startOffset,
+      endOffset,
     });
   }
 
