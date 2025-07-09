@@ -11,10 +11,39 @@
   animation: fadeOut 0.8s ease forwards;
 }
 
-.mogu-word.mogu-target {
-  background-color: rgba(243, 232, 255, 0.8);
+.mogu-word.is-selected {
+  background-color: rgba(196, 181, 253, 0.3);
   border-radius: 3px;
-  box-shadow: 0 0 5px rgba(196, 181, 253, 0.5);
+}
+
+@media (prefers-color-scheme: dark) {
+  .mogu-word.is-selected {
+    background-color: rgba(196, 181, 253, 0.5);
+  }
+}
+
+.mogu-word.mogu-target {
+  background-color: rgba(139, 92, 246, 0.5);
+  border-radius: 3px;
+  box-shadow: 0 0 8px rgba(139, 92, 246, 0.8);
+  animation: moguPulse 0.8s ease-in-out infinite;
+}
+
+@media (prefers-color-scheme: dark) {
+  .mogu-word.mogu-target {
+    background-color: rgba(139, 92, 246, 0.7);
+    box-shadow: 0 0 10px rgba(139, 92, 246, 0.9);
+  }
+}
+
+@keyframes moguPulse {
+  0%,
+  100% {
+    transform: scale(1);
+  }
+  50% {
+    transform: scale(1.1);
+  }
 }
 
 #mogu {

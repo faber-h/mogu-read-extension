@@ -10,7 +10,7 @@ export function wrapSelectionWithMoguWord(selectedRange) {
     if (!selectedText) return null;
 
     const span = document.createElement("span");
-    span.className = "mogu-word";
+    span.classList.add("mogu-word", "is-selected");
     span.dataset.wordId = generateId();
 
     const contents = selectedRange.extractContents();
