@@ -1,4 +1,5 @@
 import { sendContentDetection } from "./contentDetector.js";
+import { executeDeclutter } from "./declutterController.js";
 import {
   clearMoguTimeout,
   positionMoguToCurrent,
@@ -63,6 +64,10 @@ export function handleMessage(message, state) {
     case "RESUME_READING":
       state.paused = false;
       startMoguEating(state);
+      break;
+
+    case "DECLUTTER":
+      executeDeclutter(message.groupedBySelector);
       break;
 
     default:

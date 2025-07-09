@@ -2,6 +2,7 @@ import { ChevronDownIcon, ChevronRightIcon } from "@heroicons/react/24/solid";
 import { useState } from "react";
 
 import ButtonPrimary from "@/components/ButtonPrimary";
+import { useChromeExtension } from "@/hooks/useChromeExtension";
 
 import Section from "./components/Section";
 import SectionScroll from "./components/SectionScroll";
@@ -10,6 +11,7 @@ import { useSelectedSentences } from "./hooks/useSelectedSentences";
 
 const DeclutterMode = () => {
   const { selectedSentences, removeSentence } = useSelectedSentences();
+  const { sendMessageSafely } = useChromeExtension();
 
   const [history, setHistory] = useState([
     {
@@ -47,6 +49,22 @@ const DeclutterMode = () => {
     );
   };
 
+  const handleDeclutter = () => {
+    const groupedBySelector = selectedSentences.reduce((acc, sentence) => {
+      acc[sentence.selector] = acc[sentence.selector] || [];
+      acc[sentence.selector].push({
+        startOffset: sentence.startOffset,
+        endOffset: sentence.endOffset,
+      });
+      return acc;
+    }, {});
+
+    sendMessageSafely({
+      type: "DECLUTTER",
+      groupedBySelector,
+    });
+  };
+
   return (
     <div className="flex h-full flex-col gap-4 overflow-hidden">
       <Section title="📑 선택된 문장" flex="flex-[3]">
@@ -60,7 +78,10 @@ const DeclutterMode = () => {
           ))}
         </SectionScroll>
 
-        <ButtonPrimary className="mx-4 mt-4 w-[calc(100%-2rem)] shrink-0">
+        <ButtonPrimary
+          className="mx-4 mt-4 w-[calc(100%-2rem)] shrink-0"
+          onClick={handleDeclutter}
+        >
           정리 시작
         </ButtonPrimary>
       </Section>
