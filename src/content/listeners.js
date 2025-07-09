@@ -31,5 +31,7 @@ export function setupSelectionListeners() {
         payload: data,
       });
     });
+
+    window.getSelection().removeAllRanges();
   });
 }
