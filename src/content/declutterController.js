@@ -26,6 +26,8 @@ async function animateDeclutterSequence(wordIds) {
 
   mogu.classList.remove("declutter-mode");
   mogu.style.opacity = "0";
+
+  chrome.runtime.sendMessage({ type: "DECLUTTER_DONE" });
 }
 
 export function delay(ms) {

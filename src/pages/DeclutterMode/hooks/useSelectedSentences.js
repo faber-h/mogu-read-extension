@@ -24,6 +24,10 @@ export function useSelectedSentences() {
           body: `기존 선택: "${existingText}"`,
         });
       }
+
+      if (message.type === "DECLUTTER_DONE") {
+        setSelectedSentences([]);
+      }
     };
 
     chrome.runtime.onMessage.addListener(listener);
