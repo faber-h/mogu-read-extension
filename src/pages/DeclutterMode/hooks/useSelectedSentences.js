@@ -1,10 +1,12 @@
 import { useEffect, useState } from "react";
 
+import { useChromeExtension } from "@/hooks/useChromeExtension";
 import { useToastStore } from "@/stores/useToastStore";
 
 export function useSelectedSentences() {
   const [selectedSentences, setSelectedSentences] = useState([]);
   const showToast = useToastStore((state) => state.showToast);
+  const { sendMessageSafely } = useChromeExtension();
 
   useEffect(() => {
     const listener = (message) => {
@@ -25,6 +27,7 @@ export function useSelectedSentences() {
     };
 
     chrome.runtime.onMessage.addListener(listener);
+
     return () => chrome.runtime.onMessage.removeListener(listener);
   }, [showToast]);
 
@@ -32,6 +35,10 @@ export function useSelectedSentences() {
     setSelectedSentences((prev) =>
       prev.filter((sentence) => sentence.id !== id)
     );
+
+    sendMessageSafely({ type: "REMOVE_SENTENCE", removeId: id });
+
+    chrome.runtime.sendMessage({});
   };
 
   return {

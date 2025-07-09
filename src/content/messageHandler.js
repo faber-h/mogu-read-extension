@@ -6,6 +6,7 @@ import {
   startMoguEating,
   resetFocusMode,
 } from "./moguController.js";
+import { unwrapMoguWord } from "./unwrapSelection.js";
 import { wrapContentWords, updateWordsProgress } from "./wordWrapper.js";
 
 export function handleMessage(message, state) {
@@ -68,6 +69,10 @@ export function handleMessage(message, state) {
 
     case "DECLUTTER":
       executeDeclutter(message.wordIds);
+      break;
+
+    case "REMOVE_SENTENCE":
+      unwrapMoguWord(message.removeId);
       break;
 
     default:
