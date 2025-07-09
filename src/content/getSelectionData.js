@@ -40,7 +40,7 @@ function getUniqueCssSelector(targetElement) {
     let part = currentElement.tagName.toLowerCase();
 
     if (currentElement.id) {
-      part = `#${currentElement.id}`;
+      part = `#${CSS.escape(currentElement.id)}`;
       selectorParts.unshift(part);
       break;
     }
@@ -49,7 +49,11 @@ function getUniqueCssSelector(targetElement) {
       currentElement.className &&
       typeof currentElement.className === "string"
     ) {
-      const classNames = currentElement.className.trim().split(/\s+/).join(".");
+      const classNames = currentElement.className
+        .trim()
+        .split(/\s+/)
+        .filter((classNamePart) => !classNamePart.includes(":"))
+        .join(".");
       if (classNames) {
         part += `.${classNames}`;
       }
