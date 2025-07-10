@@ -8,7 +8,7 @@ import {
   deletePagesByUrl as deletePagesByUrlFromStorage,
   clearAllPages as clearAllPagesFromStorage,
 } from "@/utils/declutterHistory";
-import { extractDomain } from "@/utils/extractDomain";
+import { extractDomain, extractPageUrl } from "@/utils/urlUtils";
 
 import { useChromeExtension } from "./useChromeExtension";
 import useChromeStorage from "./useChromeStorage";
@@ -28,11 +28,11 @@ export function useDeclutterHistory() {
         if (!tab) throw new Error("현재 탭 정보를 가져올 수 없습니다.");
 
         const page = {
+          cleanedContent,
           id,
-          url: tab.url,
+          url: extractPageUrl(tab.url),
           title: tab.title || "-",
           domain: extractDomain(tab.url),
-          cleanedContent,
           savedAt: Date.now(),
         };
 
@@ -55,7 +55,7 @@ export function useDeclutterHistory() {
 
         const sentencesWithMeta = sentences.map((sentence) => ({
           ...sentence,
-          url: tab.url,
+          url: extractPageUrl(tab.url),
           title: tab.title || "-",
           domain: extractDomain(tab.url),
           savedAt: Date.now(),
