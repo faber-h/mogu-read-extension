@@ -6,7 +6,7 @@ export function findMoguWordAncestor(node) {
   }
 
   while (current && current.nodeType === Node.ELEMENT_NODE) {
-    if (current.classList && current.classList.contains("mogu-word")) {
+    if (current.classList && current.classList.contains("mogu-word-selected")) {
       return current;
     }
     current = current.parentElement;

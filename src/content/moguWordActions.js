@@ -10,7 +10,7 @@ export function wrapSelectionWithMoguWord(selectedRange) {
     if (!selectedText) return null;
 
     const span = document.createElement("span");
-    span.classList.add("mogu-word", "is-selected");
+    span.classList.add("mogu-word-selected");
     span.dataset.wordId = generateId();
 
     const contents = selectedRange.extractContents();
@@ -38,7 +38,10 @@ export function unwrapMoguWord(wordId) {
       `[data-word-id="${wordId}"]`
     );
 
-    if (!moguWordElement || !moguWordElement.classList.contains("mogu-word"))
+    if (
+      !moguWordElement ||
+      !moguWordElement.classList.contains("mogu-word-selected")
+    )
       return false;
 
     const parent = moguWordElement.parentElement;
@@ -69,7 +72,10 @@ export function highlightMoguWord(wordId) {
 
     const targetMoguWord = document.querySelector(`[data-word-id="${wordId}"]`);
 
-    if (!targetMoguWord || !targetMoguWord.classList.contains("mogu-word"))
+    if (
+      !targetMoguWord ||
+      !targetMoguWord.classList.contains("mogu-word-selected")
+    )
       return;
 
     targetMoguWord.classList.add("mogu-word-highlighted");
