@@ -11,9 +11,10 @@ import SentenceCard from "./components/SentenceCard";
 import { useSelectedSentences } from "./hooks/useSelectedSentences";
 
 const DeclutterMode = () => {
-  const { selectedSentences, removeSentence } = useSelectedSentences();
+  const { selectedSentences, removeSentence: removeSelectSentence } =
+    useSelectedSentences();
   const { sendMessageSafely, getCurrentTab } = useChromeExtension();
-  const { pages } = useDeclutterHistory();
+  const { pages, removePage: removeHistorySentence } = useDeclutterHistory();
 
   const [currentUrl, setCurrentUrl] = useState("");
 
@@ -45,7 +46,7 @@ const DeclutterMode = () => {
               key={sentence.id}
               sentence={sentence}
               text={sentence.text}
-              onRemove={() => removeSentence(sentence.id)}
+              onRemove={() => removeSelectSentence(sentence.id)}
             />
           ))}
         </SectionScroll>
@@ -61,7 +62,12 @@ const DeclutterMode = () => {
       <Section title="📜 정리된 문장" flex="flex-[2]">
         <SectionScroll>
           {currentPageHistory.map((sentence) => (
-            <SentenceCard key={sentence.id} text={sentence.text} prefix="- " />
+            <SentenceCard
+              key={sentence.id}
+              text={sentence.text}
+              prefix="- "
+              onRemove={() => removeHistorySentence(sentence.id)}
+            />
           ))}
         </SectionScroll>
       </Section>
