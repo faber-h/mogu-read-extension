@@ -1,5 +1,6 @@
 import { useCallback } from "react";
 
+import { extractDomain } from "@/utils/extractDomain";
 import { generateId } from "@/utils/generateId";
 import {
   READING_HISTORY_KEY,
@@ -7,7 +8,6 @@ import {
   deleteReadingRecord,
   clearReadingHistory,
   getReadingStatistics,
-  extractDomain,
 } from "@/utils/readingHistory";
 
 import { useChromeExtension } from "./useChromeExtension";
