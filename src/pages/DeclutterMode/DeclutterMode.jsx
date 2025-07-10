@@ -1,8 +1,9 @@
-import { ChevronDownIcon, ChevronRightIcon } from "@heroicons/react/24/solid";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 
 import ButtonPrimary from "@/components/ButtonPrimary";
 import { useChromeExtension } from "@/hooks/useChromeExtension";
+import { useDeclutterHistory } from "@/hooks/useDeclutterHistory";
+import { extractPageUrl } from "@/utils/urlUtils";
 
 import Section from "./components/Section";
 import SectionScroll from "./components/SectionScroll";
@@ -11,51 +12,28 @@ import { useSelectedSentences } from "./hooks/useSelectedSentences";
 
 const DeclutterMode = () => {
   const { selectedSentences, removeSentence } = useSelectedSentences();
-  const { sendMessageSafely } = useChromeExtension();
+  const { sendMessageSafely, getCurrentTab } = useChromeExtension();
+  const { pages } = useDeclutterHistory();
 
-  const [history, setHistory] = useState([
-    {
-      url: "example.com",
-      isOpen: true,
-      sentences: Array(20).fill("첫 번째 문장 내용..."),
-    },
-    {
-      url: "example.co.kr",
-      isOpen: false,
-      sentences: ["다른 문장 1", "다른 문장 2"],
-    },
-  ]);
+  const [currentUrl, setCurrentUrl] = useState("");
 
-  const toggleSite = (idx) => {
-    setHistory((prev) =>
-      prev.map((site, i) =>
-        i === idx
-          ? { ...site, isOpen: !site.isOpen }
-          : { ...site, isOpen: false }
-      )
-    );
-  };
+  useEffect(() => {
+    (async () => {
+      const tab = await getCurrentTab();
+      if (!tab) return;
 
-  const removeHistorySentence = (siteIdx, sentIdx) => {
-    setHistory((prev) =>
-      prev.map((site, i) =>
-        i === siteIdx
-          ? {
-              ...site,
-              sentences: site.sentences.filter((_, sIdx) => sIdx !== sentIdx),
-            }
-          : site
-      )
-    );
-  };
+      const pageUrl = extractPageUrl(tab.url);
+      setCurrentUrl(pageUrl);
+    })();
+  }, [getCurrentTab]);
+
+  const currentPageHistory = pages.filter(
+    (sentence) => sentence.url === currentUrl
+  );
 
   const handleDeclutter = () => {
     const wordIds = selectedSentences.map((sentence) => sentence.id);
-
-    sendMessageSafely({
-      type: "DECLUTTER",
-      wordIds,
-    });
+    sendMessageSafely({ type: "DECLUTTER", wordIds });
   };
 
   return (
@@ -80,34 +58,10 @@ const DeclutterMode = () => {
         </ButtonPrimary>
       </Section>
 
-      <Section title="📜 정리된 사이트" flex="flex-[2]">
+      <Section title="📜 정리된 문장" flex="flex-[2]">
         <SectionScroll>
-          {history.map((site, idx) => (
-            <div key={site.url}>
-              <button
-                onClick={() => toggleSite(idx)}
-                className="flex cursor-pointer items-center"
-              >
-                {site.isOpen ? (
-                  <ChevronDownIcon className="mr-1 h-4 w-4" />
-                ) : (
-                  <ChevronRightIcon className="mr-1 h-4 w-4" />
-                )}{" "}
-                {site.url} ({site.sentences.length}문장)
-              </button>
-              {site.isOpen && (
-                <div className="mt-1 ml-4 flex flex-col gap-1">
-                  {site.sentences.map((sentence, sentenceIdx) => (
-                    <SentenceCard
-                      key={sentenceIdx}
-                      text={sentence}
-                      prefix="- "
-                      onRemove={() => removeHistorySentence(idx, sentenceIdx)}
-                    />
-                  ))}
-                </div>
-              )}
-            </div>
+          {currentPageHistory.map((sentence) => (
+            <SentenceCard key={sentence.id} text={sentence.text} prefix="- " />
           ))}
         </SectionScroll>
       </Section>
