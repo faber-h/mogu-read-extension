@@ -3,13 +3,15 @@ import { useEffect, useState } from "react";
 import { useChromeExtension } from "@/hooks/useChromeExtension";
 import { useToastStore } from "@/stores/useToastStore";
 
+import { useDeclutterCompletion } from "../hooks/useDeclutterCompletion";
 export function useSelectedSentences() {
   const [selectedSentences, setSelectedSentences] = useState([]);
   const showToast = useToastStore((state) => state.showToast);
   const { sendMessageSafely } = useChromeExtension();
+  const { handleDeclutterDone } = useDeclutterCompletion(selectedSentences);
 
   useEffect(() => {
-    const listener = (message) => {
+    const listener = async (message) => {
       if (message.type === "ADD_SENTENCE") {
         const newSentence = message.payload;
 
@@ -26,6 +28,7 @@ export function useSelectedSentences() {
       }
 
       if (message.type === "DECLUTTER_DONE") {
+        await handleDeclutterDone();
         setSelectedSentences([]);
       }
     };
@@ -33,7 +36,7 @@ export function useSelectedSentences() {
     chrome.runtime.onMessage.addListener(listener);
 
     return () => chrome.runtime.onMessage.removeListener(listener);
-  }, [showToast]);
+  }, [showToast, handleDeclutterDone]);
 
   const removeSentence = (id) => {
     setSelectedSentences((prev) =>
