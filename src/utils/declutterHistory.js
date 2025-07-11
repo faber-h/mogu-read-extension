@@ -1,5 +1,3 @@
-// declutterStorage.js
-
 import { chromeStorage } from "./chromeStorage";
 
 export const DECLUTTER_PAGE_KEY = "moguread_decluttered_pages";
