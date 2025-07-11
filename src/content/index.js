@@ -1,3 +1,4 @@
+import { checkAndApplyAutoDeclutter } from "./autoDeclutterManager.js";
 import { sendContentDetection } from "./contentDetector.js";
 import {
   setupVisibilityListener,
@@ -15,6 +16,8 @@ if (!window.moguReadState) {
     readingSpeed: 300,
     previewMode: false,
   };
+
+  checkAndApplyAutoDeclutter();
 
   sendContentDetection();
   initializeMogu();
