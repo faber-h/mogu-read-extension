@@ -3,11 +3,7 @@ export async function checkAndApplyAutoDeclutter() {
     const matchingHistory = await getDeclutterHistoryByUrl();
     if (matchingHistory.length === 0) return;
 
-    const sortedHistory = matchingHistory.sort(
-      (earlierItem, laterItem) => earlierItem.savedAt - laterItem.savedAt
-    );
-
-    await applyAutoDeclutter(sortedHistory);
+    await applyAutoDeclutter(matchingHistory);
   } catch (error) {
     console.error("자동 삭제 확인 중 오류:", error);
   }
@@ -24,19 +20,23 @@ async function applyAutoDeclutter(historyItems) {
       continue;
     }
 
-    const targetItems = [...items];
-    while (targetItems.length > 0) {
+    const groupedBySavedAt = groupBySavedAt(items);
+
+    for (const savedAtGroup of groupedBySavedAt) {
       const currentTextContent = getElementTextContent(targetElement);
-      let processedCount = 0;
 
-      for (let index = targetItems.length - 1; index >= 0; index--) {
-        const item = targetItems[index];
+      savedAtGroup.sort(
+        (earlierItem, laterItem) =>
+          laterItem.startOffset - earlierItem.startOffset
+      );
 
+      for (const item of savedAtGroup) {
         const newOffset = findTextInCurrentContent(
           currentTextContent,
           item.text,
           item.startOffset
         );
+
         if (newOffset !== null) {
           const updatedItem = {
             ...item,
@@ -54,18 +54,12 @@ async function applyAutoDeclutter(historyItems) {
               `[data-word-id="${wordId}"]`
             );
             moguWordElement?.remove();
-            targetItems.splice(index, 1);
-            processedCount++;
           } else {
             failedIds.push(item.id);
-            targetItems.splice(index, 1);
           }
+        } else {
+          failedIds.push(item.id);
         }
-      }
-
-      if (processedCount === 0) {
-        failedIds.push(...targetItems.map((item) => item.id));
-        break;
       }
     }
   }
@@ -73,6 +67,38 @@ async function applyAutoDeclutter(historyItems) {
   if (failedIds.length > 0) {
     await cleanInvalidHistory(failedIds);
   }
+}
+
+function groupBySavedAt(items) {
+  const grouped = {};
+
+  for (const item of items) {
+    if (!grouped[item.savedAt]) {
+      grouped[item.savedAt] = [];
+    }
+    grouped[item.savedAt].push(item);
+  }
+
+  const sortedSavedAtGroups = Object.entries(grouped)
+    .sort(
+      ([earlierItem], [laterItem]) => Number(earlierItem) - Number(laterItem)
+    )
+    .map(([, group]) => group);
+
+  return sortedSavedAtGroups;
+}
+
+function groupBySelector(historyItems) {
+  const grouped = {};
+
+  for (const item of historyItems) {
+    if (!grouped[item.selector]) {
+      grouped[item.selector] = [];
+    }
+    grouped[item.selector].push(item);
+  }
+
+  return grouped;
 }
 
 function findTextInCurrentContent(currentContent, targetText, originalOffset) {
@@ -87,28 +113,6 @@ function findTextInCurrentContent(currentContent, targetText, originalOffset) {
   }
 
   return null;
-}
-
-function groupBySelector(historyItems) {
-  const grouped = {};
-
-  for (const item of historyItems) {
-    if (!grouped[item.selector]) {
-      grouped[item.selector] = [];
-    }
-    grouped[item.selector].push(item);
-  }
-
-  Object.values(grouped).forEach((group) => {
-    group.sort((earlierItem, laterItem) => {
-      if (earlierItem.savedAt !== laterItem.savedAt) {
-        return earlierItem.savedAt - laterItem.savedAt;
-      }
-      return earlierItem.startOffset - laterItem.startOffset;
-    });
-  });
-
-  return grouped;
 }
 
 async function createMoguWordFromHistory(historyItem, targetElement) {
