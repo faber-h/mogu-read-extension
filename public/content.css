@@ -45,11 +45,56 @@
   transition: all 0.3s ease !important;
 }
 
-#mogu {
-  pointer-events: none;
-  width: 40px;
-  z-index: 9999;
+.mogu-position-indicator {
+  position: relative;
+  display: inline-block;
+  vertical-align: middle;
+  width: 2px;
+  height: 1em;
+  margin: 0 2px;
+  background-color: rgba(139, 92, 246, 0.8);
+  border-radius: 1px;
+  animation: mogu-blink 1s infinite;
+}
+
+@media (prefers-color-scheme: dark) {
+  .mogu-position-indicator {
+    background-color: rgba(196, 181, 253, 0.8);
+  }
+}
+
+.mogu-position-indicator-tooltip {
   position: absolute;
+  top: -32px;
+  left: 50%;
+  transform: translateX(-50%);
+  z-index: 1000;
+  display: inline-block;
+  padding: 0.25rem 0.5rem;
+  border-radius: 9999px;
+  font-size: 0.75rem;
+  line-height: 1rem;
+  white-space: nowrap;
+  color: #ffffff;
+  background-color: rgba(139, 92, 246, 0.95);
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+  pointer-events: none;
+  opacity: 0.95;
+}
+
+@media (prefers-color-scheme: dark) {
+  .mogu-position-indicator-tooltip {
+    background-color: rgba(196, 181, 253, 0.95);
+    color: #0f172a;
+    box-shadow: 0 0 10px rgba(196, 181, 253, 0.7);
+  }
+}
+
+#mogu {
+  position: absolute;
+  z-index: 9999;
+  width: 40px;
+  pointer-events: none;
   opacity: 0;
 }
 
@@ -75,5 +120,16 @@
   }
   50% {
     transform: scale(1.1);
+  }
+}
+
+@keyframes mogu-blink {
+  0%,
+  50% {
+    opacity: 1;
+  }
+  51%,
+  100% {
+    opacity: 0.4;
   }
 }
