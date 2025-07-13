@@ -1,5 +1,6 @@
 import { sendContentDetection } from "./contentDetector.js";
 import { executeDeclutter } from "./declutterController.js";
+import { showDeclutterHistoryIndicator } from "./declutterHistoryIndicator.js";
 import {
   clearMoguTimeout,
   positionMoguToCurrent,
@@ -77,6 +78,10 @@ export function handleMessage(message, state) {
 
     case "HIGHLIGHT_SENTENCE":
       highlightMoguWord(message.sentenceId);
+      break;
+
+    case "SHOW_DECLUTTER_HISTORY_POSITION":
+      showDeclutterHistoryIndicator(message.sentenceId);
       break;
 
     default:
