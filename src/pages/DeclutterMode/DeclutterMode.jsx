@@ -46,6 +46,7 @@ const DeclutterMode = () => {
               key={sentence.id}
               sentence={sentence}
               text={sentence.text}
+              context="selected"
               onRemove={() => removeSelectSentence(sentence.id)}
             />
           ))}
@@ -64,8 +65,10 @@ const DeclutterMode = () => {
           {currentPageHistory.map((sentence) => (
             <SentenceCard
               key={sentence.id}
+              sentence={sentence}
               text={sentence.text}
               prefix="- "
+              context="history"
               onRemove={() => removeHistorySentence(sentence.id)}
             />
           ))}

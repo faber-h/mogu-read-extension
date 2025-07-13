@@ -2,20 +2,28 @@ import { XMarkIcon } from "@heroicons/react/24/outline";
 
 import { useChromeExtension } from "@/hooks/useChromeExtension";
 
-const SentenceCard = ({ sentence, text, prefix = "", onRemove }) => {
+const SentenceCard = ({ sentence, text, prefix = "", context, onRemove }) => {
   const { sendMessageSafely } = useChromeExtension();
 
   const displayText = text.replaceAll(" ", "\u00A0");
 
   const handleCardClick = (e) => {
     if (e.target.closest("button")) return;
+    if (!sentence || !sentence.id) return;
 
-    if (sentence && sentence.id) {
-      sendMessageSafely({
-        type: "HIGHLIGHT_SENTENCE",
-        sentenceId: sentence.id,
-      });
-    }
+    const messageType =
+      context === "selected"
+        ? "HIGHLIGHT_SENTENCE"
+        : context === "history"
+          ? "SHOW_DECLUTTER_HISTORY_POSITION"
+          : null;
+
+    if (!messageType) return;
+
+    sendMessageSafely({
+      type: messageType,
+      sentenceId: sentence.id,
+    });
   };
 
   return (
