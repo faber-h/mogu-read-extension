@@ -1,22 +1,29 @@
 import { XMarkIcon } from "@heroicons/react/24/outline";
+import { useMemo } from "react";
 
 import { useReadingHistory } from "@/hooks/useReadingHistory";
 import Section from "@/pages/DeclutterMode/components/Section";
 import SectionScroll from "@/pages/DeclutterMode/components/SectionScroll";
 
 import EmptyState from "./EmptyState";
-import SettingHeader from "./SettingHeader";
+import { useViewOptionStore } from "../stores/useViewOptionStore";
+import { getFilteredData } from "../utils/dateUtils";
 
 export default function ReadingHistory() {
   const { history: readingHistory, removeRecord } = useReadingHistory();
+  const { mode, year, month } = useViewOptionStore();
 
-  const isEmpty = readingHistory.length === 0;
+  const filteredHistory = useMemo(() => {
+    return getFilteredData(readingHistory, mode, year, month, "completedAt");
+  }, [readingHistory, mode, year, month]);
 
-  const historyMinutes = readingHistory.reduce(
+  const isEmpty = filteredHistory.length === 0;
+
+  const historyMinutes = filteredHistory.reduce(
     (acc, item) => acc + Math.round(item.readingSeconds / 60),
     0
   );
-  const historyWords = readingHistory.reduce(
+  const historyWords = filteredHistory.reduce(
     (acc, item) => acc + item.totalWords,
     0
   );
@@ -31,11 +38,7 @@ export default function ReadingHistory() {
   };
 
   return (
-    <div className="flex h-full flex-col overflow-hidden">
-      <div className="flex-shrink-0">
-        <SettingHeader />
-      </div>
-
+    <>
       {isEmpty ? (
         <EmptyState
           title="몰입 읽기 기록이 없습니다."
@@ -61,7 +64,7 @@ export default function ReadingHistory() {
           <div className="flex flex-1 flex-col overflow-hidden">
             <Section title="기록 리스트" flex="flex-1 flex flex-col min-h-0">
               <SectionScroll>
-                {readingHistory.map((history) => (
+                {filteredHistory.map((history) => (
                   <div
                     key={history.id}
                     className="flex justify-between rounded border border-gray-200 px-3 py-2 text-sm text-gray-700 transition-colors hover:bg-gray-50"
@@ -91,6 +94,6 @@ export default function ReadingHistory() {
           </div>
         </div>
       )}
-    </div>
+    </>
   );
 }

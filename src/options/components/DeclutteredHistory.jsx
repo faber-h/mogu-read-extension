@@ -10,15 +10,21 @@ import Section from "@/pages/DeclutterMode/components/Section";
 import SectionScroll from "@/pages/DeclutterMode/components/SectionScroll";
 
 import EmptyState from "./EmptyState";
-import SettingHeader from "./SettingHeader";
+import { useViewOptionStore } from "../stores/useViewOptionStore";
+import { getFilteredData } from "../utils/dateUtils";
 
 export default function DeclutteredHistory() {
   const { pages: declutteredSentences, removePage } = useDeclutterHistory();
+  const { mode, year, month } = useViewOptionStore();
 
-  const isEmpty = declutteredSentences.length === 0;
+  const filteredSentences = useMemo(() => {
+    return getFilteredData(declutteredSentences, mode, year, month, "savedAt");
+  }, [declutteredSentences, mode, year, month]);
+
+  const isEmpty = filteredSentences.length === 0;
 
   const groupedByUrlMap = useMemo(() => {
-    return declutteredSentences.reduce((acc, item) => {
+    return filteredSentences.reduce((acc, item) => {
       if (!acc[item.url]) {
         acc[item.url] = {
           url: item.url,
@@ -35,7 +41,7 @@ export default function DeclutteredHistory() {
 
       return acc;
     }, {});
-  }, [declutteredSentences]);
+  }, [filteredSentences]);
 
   const groupedPageList = Object.values(groupedByUrlMap);
 
@@ -56,13 +62,11 @@ export default function DeclutteredHistory() {
     }
   };
 
-  const totalSentences = declutteredSentences.length;
+  const totalSentences = filteredSentences.length;
   const totalPages = groupedPageList.length;
 
   return (
-    <div className="flex h-full flex-col overflow-hidden">
-      <SettingHeader />
-
+    <>
       {isEmpty ? (
         <EmptyState
           title="정리된 기록이 없습니다."
@@ -141,6 +145,6 @@ export default function DeclutteredHistory() {
           </div>
         </div>
       )}
-    </div>
+    </>
   );
 }
