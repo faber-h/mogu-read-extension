@@ -1,4 +1,5 @@
 import { findContentElement } from "./contentDetector.js";
+import { getFirstCharWidth } from "./getFirstCharWidth.js";
 
 export function initializeMogu() {
   if (document.getElementById("mogu")) return;
@@ -25,8 +26,11 @@ export function positionMoguToCurrent(state) {
   if (!word) return;
 
   const rect = word.getBoundingClientRect();
+  const firstCharWidth = getFirstCharWidth(word);
+  const startX = rect.left + window.scrollX - firstCharWidth;
+
   mogu.style.transition = "none";
-  mogu.style.left = `${rect.left + window.scrollX}px`;
+  mogu.style.left = `${startX}px`;
   mogu.style.top = `${rect.top + window.scrollY}px`;
 }
 
@@ -50,10 +54,13 @@ export function startMoguEating(state) {
   if (!mogu || !allWords.length) return;
 
   if (state.currentIdx === 0) {
-    const firstWord = allWords[state.currentIdx];
+    const firstWord = allWords[0];
     const rect = firstWord.getBoundingClientRect();
+    const firstCharWidth = getFirstCharWidth(firstWord);
+    const startX = rect.left + window.scrollX - firstCharWidth;
+
     mogu.style.transition = "none";
-    mogu.style.left = `${rect.left + window.scrollX}px`;
+    mogu.style.left = `${startX}px`;
     mogu.style.top = `${rect.top + window.scrollY}px`;
   }
 
@@ -89,20 +96,25 @@ function moveMogu(allWords, mogu, state) {
 
   const word = allWords[state.currentIdx];
   const rect = word.getBoundingClientRect();
-  const startX = rect.left + window.scrollX;
-  const endX = rect.right + window.scrollX;
   const wordTop = rect.top + window.scrollY;
 
-  mogu.style.transition = "none";
-  mogu.style.left = `${startX}px`;
-  mogu.style.top = `${wordTop}px`;
+  if (state.currentIdx === 0) {
+    const firstCharWidth = getFirstCharWidth(word);
+    const startX = rect.left + window.scrollX - firstCharWidth;
 
+    mogu.style.transition = "none";
+    mogu.style.left = `${startX}px`;
+    mogu.style.top = `${wordTop}px`;
+  }
+
+  const endX = rect.right + window.scrollX;
   const totalDuration = calcWordDuration(word.textContent, state);
   const animationDuration = Math.floor(totalDuration * 0.7);
 
   requestAnimationFrame(() => {
     mogu.style.transition = `left ${animationDuration}ms ease`;
     mogu.style.left = `${endX}px`;
+    mogu.style.top = `${wordTop}px`;
   });
 
   word.classList.add("passed");

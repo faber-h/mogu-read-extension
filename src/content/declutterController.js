@@ -1,3 +1,4 @@
+import { getFirstCharWidth } from "./getFirstCharWidth.js";
 import { initializeMogu } from "./moguController.js";
 
 export function executeDeclutter(wordIds) {
@@ -40,7 +41,8 @@ export function nextFrame() {
 
 async function animateEatAndDelete(mogu, wordElement) {
   const rect = wordElement.getBoundingClientRect();
-  const startX = rect.left + window.scrollX;
+  const firstCharWidth = getFirstCharWidth(wordElement);
+  const startX = rect.left + window.scrollX - firstCharWidth;
   const wordTop = rect.top + window.scrollY;
   const endX = rect.right + window.scrollX;
 
