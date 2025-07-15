@@ -8,7 +8,7 @@ import EmptyState from "./EmptyState";
 import SettingHeader from "./SettingHeader";
 
 export default function ReadingHistory() {
-  const { history: readingHistory } = useReadingHistory();
+  const { history: readingHistory, removeRecord } = useReadingHistory();
 
   const isEmpty = readingHistory.length === 0;
 
@@ -20,6 +20,15 @@ export default function ReadingHistory() {
     (acc, item) => acc + item.totalWords,
     0
   );
+
+  const handleDeleteRecord = async (event, recordId) => {
+    event.stopPropagation();
+    try {
+      await removeRecord(recordId);
+    } catch (error) {
+      console.error("기록 삭제 중 오류:", error);
+    }
+  };
 
   return (
     <div className="flex h-full flex-col overflow-hidden">
@@ -69,7 +78,12 @@ export default function ReadingHistory() {
                         <span>✏️ {history.totalWords}자</span>
                       </div>
                     </div>
-                    <XMarkIcon className="h-4 w-4 shrink-0" />
+                    <button
+                      onClick={(event) => handleDeleteRecord(event, history.id)}
+                      className="shrink-0 hover:text-red-500"
+                    >
+                      <XMarkIcon className="h-4 w-4 shrink-0" />
+                    </button>
                   </div>
                 ))}
               </SectionScroll>
