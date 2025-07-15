@@ -3,8 +3,9 @@ import {
   ChevronRightIcon,
   XMarkIcon,
 } from "@heroicons/react/24/outline";
-import { useState } from "react";
+import { useState, useMemo } from "react";
 
+import { useDeclutterHistory } from "@/hooks/useDeclutterHistory";
 import Section from "@/pages/DeclutterMode/components/Section";
 import SectionScroll from "@/pages/DeclutterMode/components/SectionScroll";
 
@@ -12,70 +13,48 @@ import EmptyState from "./EmptyState";
 import SettingHeader from "./SettingHeader";
 
 export default function DeclutteredHistory() {
-  const declutteredSentences = [
-    {
-      domain: "example.com",
-      url: "https://ko.react.dev/learn/your-first-component",
-      text: "첫 번째 문장",
-      title: "첫 번째 컴포넌트 – React",
-      saveAt: 1752480972443,
-      id: "1",
-    },
-    {
-      domain: "example.com",
-      url: "https://ko.react.dev/learn/your-first-component",
-      text: "두 번째 문장",
-      title: "첫 번째 컴포넌트 – React",
-      saveAt: 1752481972443,
-      id: "2",
-    },
-    {
-      domain: "example.com",
-      url: "https://ko.react.dev/learn/your-second-component",
-      text: "세 번째 문장",
-      title: "두 번째 컴포넌트 – React",
-      saveAt: 1752482972443,
-      id: "3",
-    },
-    {
-      domain: "example2.com",
-      url: "https://ko.react.dev/learn/another",
-      text: "다른 사이트 문장",
-      title: "다른 페이지 – React",
-      saveAt: 1752483972443,
-      id: "4",
-    },
-  ];
+  const { pages, removePage } = useDeclutterHistory();
+  const declutteredSentences = pages;
 
   const isEmpty = declutteredSentences.length === 0;
 
-  const groupedByUrlMap = declutteredSentences.reduce((acc, item) => {
-    if (!acc[item.url]) {
-      acc[item.url] = {
-        url: item.url,
-        domain: item.domain,
-        title: item.title,
-        sentences: [],
-      };
-    }
-    acc[item.url].sentences.push({
-      id: item.id,
-      text: item.text,
-      saveAt: item.saveAt,
-    });
+  const groupedByUrlMap = useMemo(() => {
+    return declutteredSentences.reduce((acc, item) => {
+      if (!acc[item.url]) {
+        acc[item.url] = {
+          url: item.url,
+          domain: item.domain,
+          title: item.title,
+          sentences: [],
+        };
+      }
+      acc[item.url].sentences.push({
+        id: item.id,
+        text: item.text,
+        saveAt: item.savedAt,
+      });
 
-    return acc;
-  }, {});
+      return acc;
+    }, {});
+  }, [declutteredSentences]);
+
   const groupedPageList = Object.values(groupedByUrlMap);
 
-  const [isPageGroupOpenList, setIsPageGroupOpenList] = useState(
-    groupedPageList.map(() => false)
-  );
+  const [isPageGroupOpenList, setIsPageGroupOpenList] = useState({});
 
-  const togglePageGroup = (pageIdx) => {
-    setIsPageGroupOpenList((prev) =>
-      prev.map((isOpen, i) => (i === pageIdx ? !isOpen : isOpen))
-    );
+  const togglePageGroup = (pageUrl) => {
+    setIsPageGroupOpenList((prev) => ({
+      ...prev,
+      [pageUrl]: !prev[pageUrl],
+    }));
+  };
+
+  const handleRemoveSentence = async (sentenceId) => {
+    try {
+      await removePage(sentenceId);
+    } catch (error) {
+      console.error("문장 삭제 실패:", error);
+    }
   };
 
   const totalSentences = declutteredSentences.length;
@@ -113,13 +92,13 @@ export default function DeclutteredHistory() {
               flex="flex-1 flex flex-col min-h-0"
             >
               <SectionScroll>
-                {groupedPageList.map((pageGroup, pageIdx) => (
+                {groupedPageList.map((pageGroup) => (
                   <div key={pageGroup.url} className="mb-2">
                     <button
-                      onClick={() => togglePageGroup(pageIdx)}
+                      onClick={() => togglePageGroup(pageGroup.url)}
                       className="flex w-full items-center text-left text-sm font-medium text-gray-700 hover:text-purple-600"
                     >
-                      {isPageGroupOpenList[pageIdx] ? (
+                      {isPageGroupOpenList[pageGroup.url] ? (
                         <ChevronDownIcon className="mr-1 h-4 w-4" />
                       ) : (
                         <ChevronRightIcon className="mr-1 h-4 w-4" />
@@ -130,7 +109,7 @@ export default function DeclutteredHistory() {
                       </span>
                     </button>
 
-                    {isPageGroupOpenList[pageIdx] && (
+                    {isPageGroupOpenList[pageGroup.url] && (
                       <div className="mt-1 ml-5 flex flex-col gap-1">
                         {pageGroup.sentences.map((sentence) => (
                           <div
@@ -146,11 +125,9 @@ export default function DeclutteredHistory() {
                             <button
                               onClick={(e) => {
                                 e.stopPropagation();
-                                console.log(
-                                  `삭제 로직 추가! (id: ${sentence.id})`
-                                );
+                                handleRemoveSentence(sentence.id);
                               }}
-                              className="shrink-0"
+                              className="shrink-0 hover:text-red-500"
                             >
                               <XMarkIcon className="h-4 w-4 shrink-0" />
                             </button>
