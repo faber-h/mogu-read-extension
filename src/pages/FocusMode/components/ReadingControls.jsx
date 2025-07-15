@@ -38,11 +38,11 @@ const ReadingControls = () => {
 
         <ButtonSecondary onClick={handleRewind}>
           <ArrowUturnLeftIcon className="h-4 w-4" />
-          되감기
+          되돌리기
         </ButtonSecondary>
         <ButtonSecondary onClick={handleRestart}>
           <ArrowPathIcon className="h-4 w-4" />
-          다시읽기
+          재시작
         </ButtonSecondary>
       </div>
 
