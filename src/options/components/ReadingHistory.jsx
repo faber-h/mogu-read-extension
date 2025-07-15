@@ -1,5 +1,6 @@
 import { XMarkIcon } from "@heroicons/react/24/outline";
 
+import { useReadingHistory } from "@/hooks/useReadingHistory";
 import Section from "@/pages/DeclutterMode/components/Section";
 import SectionScroll from "@/pages/DeclutterMode/components/SectionScroll";
 
@@ -7,24 +8,7 @@ import EmptyState from "./EmptyState";
 import SettingHeader from "./SettingHeader";
 
 export default function ReadingHistory() {
-  const readingHistory = [
-    {
-      domain: "example.com",
-      completedAt: 1752480972443,
-      id: "b608-9281-bb90-47f6",
-      readingSeconds: 341,
-      totalWords: 742,
-      title: "첫 번째 컴포넌트 – React",
-    },
-    {
-      domain: "example2.com",
-      completedAt: 1752480972442,
-      id: "b608-9281-bb90-47f2",
-      readingSeconds: 34,
-      totalWords: 74,
-      title: "두 번째 컴포넌트 – React",
-    },
-  ];
+  const { history: readingHistory } = useReadingHistory();
 
   const isEmpty = readingHistory.length === 0;
 
@@ -68,19 +52,21 @@ export default function ReadingHistory() {
           <div className="flex flex-1 flex-col overflow-hidden">
             <Section title="기록 리스트" flex="flex-1 flex flex-col min-h-0">
               <SectionScroll>
-                {readingHistory.map((item) => (
+                {readingHistory.map((history) => (
                   <div
-                    key={item.id}
+                    key={history.id}
                     className="flex justify-between rounded border border-gray-200 px-3 py-2 text-sm text-gray-700 transition-colors hover:bg-gray-50"
                   >
                     <div className="flex flex-col">
-                      <span className="font-medium">{item.title}</span>
+                      <span className="font-medium">{history.title}</span>
                       <span className="text-xs text-gray-500">
-                        {new Date(item.completedAt).toLocaleString()}
+                        {new Date(history.completedAt).toLocaleString()}
                       </span>
                       <div className="flex gap-2 text-xs text-gray-500">
-                        <span>⏱️ {Math.round(item.readingSeconds / 60)}분</span>
-                        <span>✏️ {item.totalWords}자</span>
+                        <span>
+                          ⏱️ {Math.round(history.readingSeconds / 60)}분
+                        </span>
+                        <span>✏️ {history.totalWords}자</span>
                       </div>
                     </div>
                     <XMarkIcon className="h-4 w-4 shrink-0" />
