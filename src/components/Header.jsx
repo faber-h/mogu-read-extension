@@ -1,10 +1,8 @@
 import ButtonSecondary from "@/components/ButtonSecondary";
 
 const Header = () => {
-  const historyUrl = import.meta.env.VITE_MOGUREAD_HISTORY_URL;
-
   const handleGoToDashboard = () => {
-    window.open(historyUrl, "_blank");
+    window.open(chrome.runtime.getURL("src/options/settings.html"));
   };
 
   return (
