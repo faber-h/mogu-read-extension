@@ -23,6 +23,9 @@
       "type": "module"
     }
   ],
+  "options_ui": {
+    "page": "src/options/settings.html"
+  },
   "web_accessible_resources": [
     {
       "resources": ["images/*"],

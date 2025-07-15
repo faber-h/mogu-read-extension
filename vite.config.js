@@ -20,6 +20,7 @@ export default defineConfig({
       input: {
         main: "./index.html",
         content: "./src/content/index.js",
+        settings: "./src/options/settings.html",
       },
       output: {
         format: "es",
