@@ -75,6 +75,15 @@ function calcWordDuration(word, state) {
   return state.readingSpeed + extraSpeed;
 }
 
+function isNewLine(currentWord, previousWord) {
+  if (!previousWord) return false;
+
+  const currentRect = currentWord.getBoundingClientRect();
+  const previousRect = previousWord.getBoundingClientRect();
+
+  return currentRect.top - previousRect.top > 5;
+}
+
 function moveMogu(allWords, mogu, state) {
   if (state.paused) return;
 
@@ -95,18 +104,35 @@ function moveMogu(allWords, mogu, state) {
   }
 
   const word = allWords[state.currentIdx];
+  const previousWord =
+    state.currentIdx > 0 ? allWords[state.currentIdx - 1] : null;
   const rect = word.getBoundingClientRect();
   const wordTop = rect.top + window.scrollY;
 
-  if (state.currentIdx === 0) {
+  const isLineChange = isNewLine(word, previousWord);
+
+  if (state.currentIdx === 0 || isLineChange) {
     const firstCharWidth = getFirstCharWidth(word);
     const startX = rect.left + window.scrollX - firstCharWidth;
 
     mogu.style.transition = "none";
     mogu.style.left = `${startX}px`;
     mogu.style.top = `${wordTop}px`;
+
+    if (isLineChange) {
+      setTimeout(() => {
+        animateMoguToWord(word, mogu, state, allWords);
+      }, 100);
+      return;
+    }
   }
 
+  animateMoguToWord(word, mogu, state, allWords);
+}
+
+function animateMoguToWord(word, mogu, state, allWords) {
+  const rect = word.getBoundingClientRect();
+  const wordTop = rect.top + window.scrollY;
   const endX = rect.right + window.scrollX;
   const totalDuration = calcWordDuration(word.textContent, state);
   const animationDuration = Math.floor(totalDuration * 0.7);
