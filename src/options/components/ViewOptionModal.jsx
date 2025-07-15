@@ -1,51 +1,105 @@
-import { useRef, useEffect } from "react";
+import { useRef, useEffect, useMemo, useState } from "react";
 
 import ButtonPrimary from "@/components/ButtonPrimary";
 import ButtonSecondary from "@/components/ButtonSecondary";
+import { useDeclutterHistory } from "@/hooks/useDeclutterHistory";
+import { useReadingHistory } from "@/hooks/useReadingHistory";
 
 import { useViewOptionStore } from "../stores/useViewOptionStore";
+import { getAvailableYears, getAvailableMonths } from "../utils/dateUtils";
 
 export default function ViewOptionModal({ onClose }) {
   const { mode, setMode, year, setYear, month, setMonth } =
     useViewOptionStore();
 
-  const years = ["2025", "2024", "2023", "2022", "2021"];
-  const months = [
-    "전체",
-    "1월",
-    "2월",
-    "3월",
-    "4월",
-    "5월",
-    "6월",
-    "7월",
-    "8월",
-    "9월",
-    "10월",
-    "11월",
-    "12월",
-  ];
+  const { pages: declutteredSentences } = useDeclutterHistory();
+  const { history: readingHistory } = useReadingHistory();
+
+  const [draftMode, setDraftMode] = useState(mode);
+  const [draftYear, setDraftYear] = useState(year);
+  const [draftMonth, setDraftMonth] = useState(month);
+
+  const combinedData = useMemo(() => {
+    const declutteredData = declutteredSentences.map((item) => ({
+      ...item,
+      date: item.savedAt,
+    }));
+    const readingData = readingHistory.map((item) => ({
+      ...item,
+      date: item.completedAt,
+    }));
+
+    return [...declutteredData, ...readingData];
+  }, [declutteredSentences, readingHistory]);
+
+  const years = useMemo(() => {
+    const dataYears = getAvailableYears(combinedData, "date");
+    const currentYear = new Date().getFullYear().toString();
+    if (!dataYears.includes(currentYear)) {
+      dataYears.push(currentYear);
+    }
+
+    return dataYears.sort((a, b) => parseInt(b) - parseInt(a));
+  }, [combinedData]);
+
+  const months = useMemo(() => {
+    const dataMonths = getAvailableMonths(combinedData, "date", draftYear);
+    const currentMonth = new Date().getMonth() + 1;
+    const currentYear = new Date().getFullYear().toString();
+
+    if (draftYear === currentYear && !dataMonths.includes(currentMonth)) {
+      dataMonths.push(currentMonth);
+    }
+
+    return dataMonths.sort((a, b) => {
+      if (a === "전체") return -1;
+      if (b === "전체") return 1;
+
+      return parseInt(b) - parseInt(a);
+    });
+  }, [combinedData, draftYear]);
 
   const yearRefs = useRef({});
   const monthRefs = useRef({});
 
   useEffect(() => {
-    if (yearRefs.current[year]) {
-      yearRefs.current[year].scrollIntoView({
-        block: "center",
-        behavior: "auto",
-      });
+    if (yearRefs.current[draftYear]) {
+      yearRefs.current[draftYear].scrollIntoView({ block: "center" });
     }
-  }, [year]);
+  }, [draftYear]);
 
   useEffect(() => {
-    if (monthRefs.current[month]) {
-      monthRefs.current[month].scrollIntoView({
-        block: "center",
-        behavior: "auto",
-      });
+    if (monthRefs.current[draftMonth]) {
+      monthRefs.current[draftMonth].scrollIntoView({ block: "center" });
     }
-  }, [month]);
+  }, [draftMonth]);
+
+  const handleModeChange = (newMode) => {
+    setDraftMode(newMode);
+    if (newMode === "byDate") {
+      if (!years.includes(draftYear)) {
+        setDraftYear(years[0]);
+      }
+      if (!months.includes(draftMonth)) {
+        setDraftMonth("전체");
+      }
+    }
+  };
+
+  const handleYearChange = (yearOption) => {
+    if (draftMode === "byDate") setDraftYear(yearOption);
+  };
+
+  const handleMonthChange = (monthOption) => {
+    if (draftMode === "byDate") setDraftMonth(monthOption);
+  };
+
+  const handleConfirm = () => {
+    setMode(draftMode);
+    setYear(draftYear);
+    setMonth(draftMonth);
+    onClose();
+  };
 
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40">
@@ -59,8 +113,8 @@ export default function ViewOptionModal({ onClose }) {
             <input
               type="radio"
               className="accent-purple-500"
-              checked={mode === "all"}
-              onChange={() => setMode("all")}
+              checked={draftMode === "all"}
+              onChange={() => handleModeChange("all")}
             />
             전체 보기
           </label>
@@ -68,8 +122,8 @@ export default function ViewOptionModal({ onClose }) {
             <input
               type="radio"
               className="accent-purple-500"
-              checked={mode === "byDate"}
-              onChange={() => setMode("byDate")}
+              checked={draftMode === "byDate"}
+              onChange={() => handleModeChange("byDate")}
             />
             날짜 선택
           </label>
@@ -80,26 +134,30 @@ export default function ViewOptionModal({ onClose }) {
             <h4 className="mb-1 text-sm font-semibold">연도</h4>
             <div
               className={`scrollbar-hide h-40 overflow-y-auto rounded border border-purple-200 ${
-                mode === "all" ? "cursor-not-allowed opacity-50" : ""
+                draftMode === "all" ? "cursor-not-allowed opacity-50" : ""
               }`}
             >
-              {years.map((yearOption) => (
-                <button
-                  key={yearOption}
-                  ref={(el) => (yearRefs.current[yearOption] = el)}
-                  className={`block w-full rounded px-2 py-2 text-left ${
-                    year === yearOption
-                      ? "bg-purple-500 text-white"
-                      : "hover:bg-gray-100"
-                  }`}
-                  onClick={() => {
-                    if (mode === "byDate") setYear(yearOption);
-                  }}
-                  disabled={mode === "all"}
-                >
-                  {yearOption} 년
-                </button>
-              ))}
+              {years.length > 0 ? (
+                years.map((yearOption) => (
+                  <button
+                    key={yearOption}
+                    ref={(el) => (yearRefs.current[yearOption] = el)}
+                    className={`block w-full rounded px-2 py-2 text-left ${
+                      draftYear === yearOption
+                        ? "bg-purple-500 text-white"
+                        : "hover:bg-gray-100"
+                    }`}
+                    onClick={() => handleYearChange(yearOption)}
+                    disabled={draftMode === "all"}
+                  >
+                    {yearOption}년
+                  </button>
+                ))
+              ) : (
+                <div className="p-2 text-center text-gray-500">
+                  데이터가 없습니다
+                </div>
+              )}
             </div>
           </div>
 
@@ -107,42 +165,37 @@ export default function ViewOptionModal({ onClose }) {
             <h4 className="mb-1 text-sm font-semibold">월</h4>
             <div
               className={`scrollbar-hide h-40 overflow-y-auto rounded border border-purple-200 ${
-                mode === "all" ? "cursor-not-allowed opacity-50" : ""
+                draftMode === "all" ? "cursor-not-allowed opacity-50" : ""
               }`}
             >
-              {months.map((monthOption) => (
-                <button
-                  key={monthOption}
-                  ref={(el) => (monthRefs.current[monthOption] = el)}
-                  className={`block w-full rounded px-2 py-2 text-left ${
-                    month === monthOption
-                      ? "bg-purple-500 text-white"
-                      : "hover:bg-gray-100"
-                  }`}
-                  onClick={() => {
-                    if (mode === "byDate") setMonth(monthOption);
-                  }}
-                  disabled={mode === "all"}
-                >
-                  {monthOption}
-                </button>
-              ))}
+              {months.length > 0 ? (
+                months.map((monthOption) => (
+                  <button
+                    key={monthOption}
+                    ref={(el) => (monthRefs.current[monthOption] = el)}
+                    className={`block w-full rounded px-2 py-2 text-left ${
+                      draftMonth == monthOption
+                        ? "bg-purple-500 text-white"
+                        : "hover:bg-gray-100"
+                    }`}
+                    onClick={() => handleMonthChange(monthOption)}
+                    disabled={draftMode === "all"}
+                  >
+                    {monthOption === "전체" ? "전체" : `${monthOption}월`}
+                  </button>
+                ))
+              ) : (
+                <div className="p-2 text-center text-gray-500">
+                  데이터가 없습니다
+                </div>
+              )}
             </div>
           </div>
         </div>
 
         <div className="flex justify-end gap-4">
-          <ButtonSecondary onClick={onClose} className="text-gray-500">
-            취소
-          </ButtonSecondary>
-          <ButtonPrimary
-            onClick={() => {
-              onClose();
-            }}
-            className="font-bold text-purple-600"
-          >
-            확인
-          </ButtonPrimary>
+          <ButtonSecondary onClick={onClose}>취소</ButtonSecondary>
+          <ButtonPrimary onClick={handleConfirm}>확인</ButtonPrimary>
         </div>
       </div>
     </div>
