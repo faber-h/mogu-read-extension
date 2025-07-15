@@ -1,5 +1,6 @@
 import DeclutteredHistory from "./components/DeclutteredHistory";
 import ReadingHistory from "./components/ReadingHistory";
+import SettingHeader from "./components/SettingHeader";
 import Sidebar from "./components/Sidebar";
 import { useSettingStore } from "./stores/useSettingStore";
 
@@ -18,7 +19,13 @@ export default function SettingsApp() {
       <Sidebar />
       <div className="flex flex-1 justify-center overflow-hidden">
         <div className="flex w-full max-w-4xl flex-col overflow-hidden p-8">
-          {ActiveComponent && <ActiveComponent />}
+          <div className="flex h-full flex-col overflow-hidden">
+            <div className="flex-shrink-0">
+              <SettingHeader />
+            </div>
+
+            {ActiveComponent && <ActiveComponent />}
+          </div>
         </div>
       </div>
     </div>
