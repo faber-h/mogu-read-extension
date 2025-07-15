@@ -14,20 +14,24 @@ export default function SettingHeader() {
   const { mode, year, month } = useViewOptionStore();
   const [isOpen, setIsOpen] = useState(false);
 
+  const getDisplayText = () => {
+    if (mode === "all") return "전체 보기";
+    if (month === "전체") return `${year}년 전체`;
+    return `${year}년 ${month}월`;
+  };
+
   return (
     <div className="mb-4">
       <h1 className="mt-4 mb-4 text-2xl font-bold">{title}</h1>
-
       <button
         onClick={() => setIsOpen(true)}
         className="flex items-center gap-1 text-purple-500"
       >
         <span className="text-xl font-semibold text-gray-800">
-          {mode === "all" ? "전체 보기" : `${year}년 ${month}`}
+          {getDisplayText()}
         </span>
         <AdjustmentsHorizontalIcon className="h-5 w-5" />
       </button>
-
       {isOpen && <ViewOptionModal onClose={() => setIsOpen(false)} />}
     </div>
   );
