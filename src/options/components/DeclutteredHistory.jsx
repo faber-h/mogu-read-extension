@@ -13,8 +13,7 @@ import EmptyState from "./EmptyState";
 import SettingHeader from "./SettingHeader";
 
 export default function DeclutteredHistory() {
-  const { pages, removePage } = useDeclutterHistory();
-  const declutteredSentences = pages;
+  const { pages: declutteredSentences, removePage } = useDeclutterHistory();
 
   const isEmpty = declutteredSentences.length === 0;
 
