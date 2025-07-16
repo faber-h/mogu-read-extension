@@ -15,14 +15,15 @@ if (!window.moguReadState) {
     timeoutId: null,
     readingSpeed: 300,
     previewMode: false,
+    isContentDetected: false,
   };
 
   checkAndApplyAutoDeclutter();
 
-  sendContentDetection();
+  sendContentDetection(window.moguReadState);
   initializeMogu();
 
   setupVisibilityListener(window.moguReadState);
   setupMessageListener(window.moguReadState);
-  setupSelectionListeners();
+  setupSelectionListeners(window.moguReadState);
 }

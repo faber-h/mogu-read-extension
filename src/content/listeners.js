@@ -20,8 +20,10 @@ export function setupMessageListener(state) {
   });
 }
 
-export function setupSelectionListeners() {
+export function setupSelectionListeners(state) {
   document.addEventListener("mouseup", () => {
+    if (!state.isContentDetected) return;
+
     const selectionList = getSelectedTextDataList();
     if (!selectionList.length) return;
 

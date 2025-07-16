@@ -46,9 +46,10 @@ export function detectContent() {
   return !!content;
 }
 
-export function sendContentDetection() {
+export function sendContentDetection(state) {
   try {
-    const isContentDetected = detectContent();
+    state.isContentDetected = detectContent();
+    const isContentDetected = state.isContentDetected;
 
     chrome.runtime.sendMessage(
       {
