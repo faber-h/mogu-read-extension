@@ -4,7 +4,6 @@ import { READING_SPEED } from "../constants/readingSpeed";
 import { READ_STATUS } from "../constants/readStatus";
 
 export const useFocusStore = create((set) => ({
-  isContentDetected: false,
   paused: false,
   previewMode: false,
   readStatus: READ_STATUS.IDLE,
@@ -15,7 +14,6 @@ export const useFocusStore = create((set) => ({
     elapsed: 0,
   },
 
-  setIsContentDetected: (value) => set({ isContentDetected: value }),
   setPaused: (paused) => set({ paused }),
   setPreviewMode: (mode) => set({ previewMode: mode }),
   setReadStatus: (status) => set({ readStatus: status }),
