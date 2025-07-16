@@ -3,6 +3,7 @@ import { useLocation, useNavigate } from "react-router";
 import { ROUTES } from "@/constants/paths";
 import { READ_STATUS } from "@/pages/FocusMode/constants/readStatus";
 import { useFocusStore } from "@/pages/FocusMode/stores/useFocusStore";
+import { useAppStore } from "@/stores/useAppStore";
 
 const MODES = [
   { label: "정리 모드", path: ROUTES.DECLUTTER },
@@ -13,6 +14,7 @@ const Nav = () => {
   const location = useLocation();
   const navigate = useNavigate();
   const readStatus = useFocusStore((state) => state.readStatus);
+  const isContentDetected = useAppStore((store) => store.isContentDetected);
 
   const selectedIndex = MODES.findIndex(
     (mode) => mode.path === location.pathname
@@ -36,7 +38,8 @@ const Nav = () => {
         />
         {MODES.map((mode, index) => {
           const isDeclutterMode = mode.path === ROUTES.DECLUTTER;
-          const isDisabled = isDeclutterMode && isFocusReading;
+          const isDisabled =
+            (isDeclutterMode && isFocusReading) || !isContentDetected;
 
           return (
             <button
