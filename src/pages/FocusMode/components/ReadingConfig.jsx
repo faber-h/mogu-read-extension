@@ -46,7 +46,7 @@ const ReadingConfig = () => {
           <div className="flex items-center text-xs text-gray-500">
             <span>선택한 속도로 미리보기 중입니다.</span>
             <button
-              className="ml-2 text-purple-600 underline"
+              className="ml-2 cursor-pointer text-purple-600 underline"
               onClick={handleStopPreview}
             >
               미리보기 중지

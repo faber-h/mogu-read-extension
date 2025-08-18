@@ -9,7 +9,7 @@ const ButtonSecondary = ({
     <button
       onClick={onClick}
       disabled={disabled}
-      className={`flex items-center gap-1 rounded-full border border-purple-500 px-4 py-2 transition ${
+      className={`flex cursor-pointer items-center gap-1 rounded-full border border-purple-500 px-4 py-2 transition ${
         selected
           ? "bg-purple-500 text-white"
           : "text-gray-600 hover:bg-purple-100"
